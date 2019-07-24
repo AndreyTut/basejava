@@ -1,3 +1,5 @@
+package javawebinar.basejava;
+
 import javawebinar.basejava.model.Resume;
 import javawebinar.basejava.storage.ArrayStorage;
 
@@ -31,6 +33,17 @@ public class MainTestArrayStorage {
         printAll();
 
         System.out.println("Size: " + ARRAY_STORAGE.getSize());
+
+        ARRAY_STORAGE.save(r1);
+        ARRAY_STORAGE.save(r2);
+        ARRAY_STORAGE.save(r3);
+
+        System.out.println(ARRAY_STORAGE.get(r1.getUuid()).hashCode());
+        System.out.println(r1.hashCode());
+        Resume newResume = new Resume();
+        newResume.setUuid(r1.getUuid());
+        ARRAY_STORAGE.update(newResume);
+        System.out.println(ARRAY_STORAGE.get(r1.getUuid()).hashCode());
     }
 
     static void printAll() {

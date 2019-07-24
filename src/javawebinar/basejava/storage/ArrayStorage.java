@@ -8,29 +8,30 @@ import java.util.Arrays;
  * Array based storage for Resumes
  */
 public class ArrayStorage {
-    private Resume[] storage = new Resume[10000];
+    private final static int CAPACITY = 10_000;
+    private Resume[] storage = new Resume[CAPACITY];
     private int size = 0;
 
     public void clear() {
-        Arrays.fill(storage, null);
+        Arrays.fill(storage, 0, size, null);
         size = 0;
     }
 
-    public void save(Resume r) {
-        if (getIndexOf(r.getUuid()) >= 0) {
-            System.out.println(String.format("javawebinar.basejava.model.Resume with uuid %s already present in storage", r.getUuid()));
+    public void save(Resume resume) {
+        if (getIndex(resume.getUuid()) >= 0) {
+            System.out.println(String.format("Resume with uuid %s already present in storage", resume.getUuid()));
             return;
         }
         if (size == storage.length) {
-            System.out.println("Storage full");
+            System.out.println("Storage is full");
             return;
         }
-        storage[size] = r;
+        storage[size] = resume;
         size++;
     }
 
     public Resume get(String uuid) {
-        int index = getIndexOf(uuid);
+        int index = getIndex(uuid);
         if (index < 0) {
             System.out.println(String.format("There isn't resume with uuid %s in storage", uuid));
             return null;
@@ -39,17 +40,17 @@ public class ArrayStorage {
     }
 
     public void delete(String uuid) {
-        int index = getIndexOf(uuid);
+        int index = getIndex(uuid);
         if (index < 0) {
             System.out.println(String.format("There isn't resume with uuid %s in storage", uuid));
             return;
         }
-        System.arraycopy(storage, index + 1, storage, index, size - index);
+        System.arraycopy(storage, index + 1, storage, index, size - index - 1);
         size--;
     }
 
     public void update(Resume resume) {
-        int index = getIndexOf(resume.getUuid());
+        int index = getIndex(resume.getUuid());
         if (index < 0) {
             System.out.println(String.format("There isn't resume with uuid %s in storage", resume.getUuid()));
             return;
@@ -68,7 +69,7 @@ public class ArrayStorage {
         return size;
     }
 
-    private int getIndexOf(String uuid) {
+    private int getIndex(String uuid) {
         for (int i = 0; i < size; i++) {
             if (uuid.equals(storage[i].getUuid())) {
                 return i;
