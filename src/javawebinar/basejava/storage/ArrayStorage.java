@@ -4,12 +4,8 @@ import javawebinar.basejava.model.Resume;
 
 import java.util.Arrays;
 
-public class ArrayStorage implements Storage{
+public class ArrayStorage extends AbstractArrayStorage {
 
-    private static final int STORAGE_LIMIT = 10000;
-
-    private Resume[] storage = new Resume[STORAGE_LIMIT];
-    private int size = 0;
 
     public void clear() {
         Arrays.fill(storage, 0, size, null);
@@ -37,15 +33,6 @@ public class ArrayStorage implements Storage{
         }
     }
 
-    public Resume get(String uuid) {
-        int index = getIndex(uuid);
-        if (index == -1) {
-            System.out.println("Resume " + uuid + " not exist");
-            return null;
-        }
-        return storage[index];
-    }
-
     public void delete(String uuid) {
         int index = getIndex(uuid);
         if (index == -1) {
@@ -61,11 +48,7 @@ public class ArrayStorage implements Storage{
         return Arrays.copyOfRange(storage, 0, size);
     }
 
-    public int size() {
-        return size;
-    }
-
-    private int getIndex(String uuid) {
+    protected int getIndex(String uuid) {
         for (int i = 0; i < size; i++) {
             if (uuid.equals(storage[i].getUuid())) {
                 return i;
@@ -73,5 +56,4 @@ public class ArrayStorage implements Storage{
         }
         return -1;
     }
-
 }
