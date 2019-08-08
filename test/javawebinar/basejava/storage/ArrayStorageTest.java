@@ -1,9 +1,8 @@
 package javawebinar.basejava.storage;
 
-import org.junit.Before;
+public class ArrayStorageTest extends AbstractArrayStorageTest {
 
-import static org.junit.Assert.*;
-
-public class ArrayStorageTest extends AbstractArrayStorageTest{
-
+    public ArrayStorageTest() {
+        super(new ArrayStorage());
+    }
 }
