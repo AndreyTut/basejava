@@ -7,25 +7,26 @@ import javawebinar.basejava.model.Resume;
 public abstract class AbstractStorage implements Storage {
 
     public void update(Resume resume) {
-        int index = getIndex(resume.getUuid());
-        if (index < 0) {
+        Object index = getIndex(resume.getUuid());
+        if (!presentInStorage(index)) {
             throw new NotExistStorageException(resume.getUuid());
         } else {
             rewriteResume(index, resume);
         }
     }
 
+
     public void save(Resume resume) {
-        int index = getIndex(resume.getUuid());
-        if (index >= 0) {
+        Object index = getIndex(resume.getUuid());
+        if (presentInStorage(index)) {
             throw new ExistStorageException(resume.getUuid());
         }
         writeResume(index, resume);
     }
 
     public Resume get(String uuid) {
-        int index = getIndex(uuid);
-        if (index < 0) {
+        Object index = getIndex(uuid);
+        if (!presentInStorage(index)) {
             throw new NotExistStorageException(uuid);
         }
         return readResume(index);
@@ -33,21 +34,23 @@ public abstract class AbstractStorage implements Storage {
 
 
     public void delete(String uuid) {
-        int index = getIndex(uuid);
-        if (index < 0) {
+        Object index = getIndex(uuid);
+        if (!presentInStorage(index)) {
             throw new NotExistStorageException(uuid);
         } else {
             removeResume(index);
         }
     }
 
-    protected abstract Resume readResume(int index);
+    protected abstract Resume readResume(Object index);
 
-    protected abstract void removeResume(int index);
+    protected abstract void removeResume(Object index);
 
-    protected abstract void writeResume(int index, Resume resume);
+    protected abstract void writeResume(Object index, Resume resume);
 
-    protected abstract void rewriteResume(int index, Resume resume);
+    protected abstract void rewriteResume(Object index, Resume resume);
 
-    protected abstract int getIndex(String uuid);
+    protected abstract Object getIndex(String uuid);
+
+    protected abstract boolean presentInStorage(Object index);
 }
