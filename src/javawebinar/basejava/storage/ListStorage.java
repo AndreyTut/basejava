@@ -41,12 +41,11 @@ public class ListStorage extends AbstractStorage {
 
     @Override
     protected void rewriteResume(Object index, Resume resume) {
-        storage.remove((int) index);
-        storage.add(resume);
+        storage.set((int) index, resume);
     }
 
     @Override
-    protected Object getIndex(String uuid) {
+    protected Integer getIndex(String uuid) {
         for (int i = 0; i < storage.size(); i++) {
             if (uuid.equals(storage.get(i).getUuid())) {
                 return i;
