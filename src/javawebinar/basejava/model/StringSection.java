@@ -1,21 +1,30 @@
 package javawebinar.basejava.model;
 
-public class StringSection extends Section {
+import java.util.Objects;
+
+public class StringSection extends AbstractSection {
 
     private String content;
 
+    public void setContent(String content) {
+        this.content = content;
+    }
+
     @Override
-    public String getContent() {
+    public String toString() {
         return content;
     }
 
-   @Override
-    public void setContent(String...content) {
-        this.content = content[0];
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof StringSection)) return false;
+        StringSection section = (StringSection) o;
+        return Objects.equals(content, section.content);
     }
 
     @Override
-    void clearContent() {
-        content = "";
+    public int hashCode() {
+        return Objects.hash(content);
     }
 }

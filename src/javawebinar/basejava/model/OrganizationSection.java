@@ -1,26 +1,23 @@
 package javawebinar.basejava.model;
 
-import java.security.InvalidParameterException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
-public class OrganizationSection extends Section {
+public class OrganizationSection extends AbstractSection {
 
-    private List<Organization> organizations = new ArrayList<>();
+    private Set<Organization> organizations = new TreeSet<>();
 
-    @Override
-    void setContent(String... content) {
-        if (content.length == 5) {
-            organizations.add(new Organization(content[0], content[1], content[2], content[3], content[4]));
-        } else if (content.length == 4) {
-            organizations.add(new Organization(content[0], content[1], content[2], content[3]));
-        } else throw new InvalidParameterException("Wrong parameters number");
+    void addItem(String orgName, String text, String from, String to) {
+        organizations.add(new Organization(orgName, text, from, to));
+    }
+
+    void addItem(String orgName, String position, String text, String from, String to) {
+        organizations.add(new Organization(orgName, position, text, from, to));
     }
 
     @Override
-    public String getContent() {
+    public String toString() {
         StringBuilder builder = new StringBuilder();
         for (Organization org : organizations) {
             builder.append(System.lineSeparator());
@@ -30,11 +27,19 @@ public class OrganizationSection extends Section {
     }
 
     @Override
-    public void clearContent() {
-        organizations.clear();
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof OrganizationSection)) return false;
+        OrganizationSection section = (OrganizationSection) o;
+        return Objects.equals(organizations, section.organizations);
     }
 
-    static class Organization {
+    @Override
+    public int hashCode() {
+        return Objects.hash(organizations);
+    }
+
+    static class Organization  implements Comparable<Organization>{
         private String orgName;
         private String position;
         private String text;
@@ -76,6 +81,11 @@ public class OrganizationSection extends Section {
             }
             builder.append(text);
             return builder.toString();
+        }
+
+        @Override
+        public int compareTo(Organization o) {
+            return o.from.compareTo(this.from);
         }
     }
 }

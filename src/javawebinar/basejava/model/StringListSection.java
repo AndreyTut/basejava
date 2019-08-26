@@ -2,28 +2,36 @@ package javawebinar.basejava.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-public class StringListSection extends Section {
+public class StringListSection extends AbstractSection {
 
     private List<String> list = new ArrayList<>();
 
-   @Override
-    public String getContent() {
+    public void setContent(String item) {
+        list.add(item);
+    }
+
+    @Override
+    public String toString() {
         StringBuilder builder = new StringBuilder();
         for (String s : list) {
             builder.append(System.lineSeparator())
-            .append(s);
+                    .append(s);
         }
         return builder.toString();
     }
 
     @Override
-    public void setContent(String...content) {
-        list.add(content[0]);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof StringListSection)) return false;
+        StringListSection section = (StringListSection) o;
+        return Objects.equals(list, section.list);
     }
 
     @Override
-    public void clearContent() {
-        list.clear();
+    public int hashCode() {
+        return Objects.hash(list);
     }
 }
