@@ -4,20 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class StringListSection extends AbstractSection {
+public class StringListSection extends AbstractSection<String> {
 
     private List<String> list = new ArrayList<>();
-
-    public void setContent(String item) {
-        list.add(item);
-    }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         for (String s : list) {
-            builder.append(System.lineSeparator())
-                    .append(s);
+            builder.append(s)
+                    .append(System.lineSeparator());
         }
         return builder.toString();
     }
@@ -33,5 +29,10 @@ public class StringListSection extends AbstractSection {
     @Override
     public int hashCode() {
         return Objects.hash(list);
+    }
+
+    @Override
+    public void addContent(String content) {
+        list.add(content);
     }
 }

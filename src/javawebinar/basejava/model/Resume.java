@@ -1,9 +1,10 @@
 package javawebinar.basejava.model;
 
-import java.awt.datatransfer.StringSelection;
-import java.util.*;
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 
-import static javawebinar.basejava.model.ContactType.*;
 import static javawebinar.basejava.model.SectionType.*;
 
 /**
@@ -43,69 +44,18 @@ public class Resume implements Comparable<Resume> {
         return contacts;
     }
 
-    public void setPhone(String phone) {
-        contacts.put(TELEPHONE, phone);
+    public void addToContacts(ContactType type, String value) {
+        contacts.put(type, value);
     }
 
-    public void setSkype(String skype) {
-        contacts.put(SKYPE, skype);
+    public <T> void addToSections(SectionType type, T content) {
+        AbstractSection section = sections.computeIfAbsent(type, this::createSection);
+        section.addContent(content);
     }
 
-    public void setEmail(String email) {
-        contacts.put(EMAIL, email);
-    }
 
-    public void setLinkedIn(String linkedIn) {
-        contacts.put(LINKEDIN, linkedIn);
-    }
-
-    public void setGitHub(String gitHub) {
-        contacts.put(GITHUB, gitHub);
-    }
-
-    public void setStackOverflow(String stackOverflow) {
-        contacts.put(STACKOVERFLOW, stackOverflow);
-    }
-
-    public void setHomePage(String homePage) {
-        contacts.put(HOMEPAGE, homePage);
-    }
-
-    public Map<SectionType, AbstractSection> getSections() {
-        return sections;
-    }
-
-    public void setPersonal(String personal) {
-        StringSection section = (StringSection) sections.computeIfAbsent(PERSONAL, k -> new StringSection());
-        section.setContent(personal);
-    }
-
-    public void setObjective(String objective) {
-        StringSection section = (StringSection) sections.computeIfAbsent(OBJECTIVE, k -> new StringSection());
-        section.setContent(objective);
-    }
-
-    public void addAchievement(String achievement) {
-        StringListSection section = (StringListSection) sections.computeIfAbsent(ACHIEVEMENT, k -> new StringListSection());
-        section.setContent(achievement);
-    }
-
-    public void addQualification(String qualification) {
-        StringListSection section = (StringListSection) sections.computeIfAbsent(QUALIFICATIONS, k -> new StringListSection());
-        section.setContent(qualification);
-    }
-
-    public void addExperience(String organization, String position, String text, String from, String to) {
-        OrganizationSection section = (OrganizationSection) sections.computeIfAbsent(EXPERIENCE, k -> new OrganizationSection());
-        section.addItem(organization, position, text, from, to);
-    }
-
-    public void addEducation(String organization, String text, String from, String to) {
-        OrganizationSection section = (OrganizationSection) sections.computeIfAbsent(EDUCATION, k -> new OrganizationSection());
-        section.addItem(organization, text, from, to);
-    }
-
-    public String getContent() {
+    @Override
+    public String toString() {
         StringBuilder builder = new StringBuilder(fullName);
         builder.append(System.lineSeparator());
 
@@ -124,11 +74,6 @@ public class Resume implements Comparable<Resume> {
         }
 
         return builder.toString();
-    }
-
-    @Override
-    public String toString() {
-        return uuid + '(' + fullName + ')';
     }
 
     @Override
@@ -151,5 +96,16 @@ public class Resume implements Comparable<Resume> {
     public int compareTo(Resume o) {
         int cmp = fullName.compareTo(o.fullName);
         return cmp != 0 ? cmp : uuid.compareTo(o.uuid);
+    }
+
+    private AbstractSection createSection(SectionType type) {
+        if (type == PERSONAL || type == OBJECTIVE) {
+            return new StringSection();
+        } else if (type == ACHIEVEMENT || type == QUALIFICATIONS) {
+            return new StringListSection();
+        } else if (type == EXPERIENCE || type == EDUCATION) {
+            return new OrganizationSection();
+        }
+        return null;
     }
 }

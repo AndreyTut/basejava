@@ -4,24 +4,16 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-public class OrganizationSection extends AbstractSection {
+public class OrganizationSection extends AbstractSection<List<String>> {
 
     private Set<Organization> organizations = new TreeSet<>();
-
-    void addItem(String orgName, String text, String from, String to) {
-        organizations.add(new Organization(orgName, text, from, to));
-    }
-
-    void addItem(String orgName, String position, String text, String from, String to) {
-        organizations.add(new Organization(orgName, position, text, from, to));
-    }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         for (Organization org : organizations) {
-            builder.append(System.lineSeparator());
-            builder.append(org);
+            builder.append(org)
+                    .append(System.lineSeparator());
         }
         return builder.toString();
     }
@@ -39,7 +31,16 @@ public class OrganizationSection extends AbstractSection {
         return Objects.hash(organizations);
     }
 
-    static class Organization  implements Comparable<Organization>{
+    @Override
+    public void addContent(List<String> list) {
+        if (list.size() == 4) {
+            organizations.add(new Organization(list.get(0), list.get(1), list.get(2), list.get(3)));
+        } else if (list.size() == 5) {
+            organizations.add(new Organization(list.get(0), list.get(1), list.get(2), list.get(3), list.get(4)));
+        }
+    }
+
+    static class Organization implements Comparable<Organization> {
         private String orgName;
         private String position;
         private String text;
@@ -72,7 +73,6 @@ public class OrganizationSection extends AbstractSection {
         @Override
         public String toString() {
             StringBuilder builder = new StringBuilder(orgName)
-                    .append(System.lineSeparator())
                     .append(getFromTo())
                     .append("\t");
             if (position != null) {
