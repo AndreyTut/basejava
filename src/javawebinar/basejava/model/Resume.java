@@ -17,7 +17,7 @@ public class Resume implements Comparable<Resume> {
 
     private final String fullName;
 
-    private final Map<ContactType, String> contacts = new EnumMap<>(ContactType.class);
+    private final Map<ContactType, AbstractSection> contacts = new EnumMap<>(ContactType.class);
 
     private final Map<SectionType, AbstractSection> sections = new EnumMap<>(SectionType.class);
 
@@ -40,29 +40,30 @@ public class Resume implements Comparable<Resume> {
         return uuid;
     }
 
-    public Map<ContactType, String> getContacts() {
-        return contacts;
-    }
-
-    public void addToContacts(ContactType type, String value) {
-        contacts.put(type, value);
-    }
-
-    public <T> void addToSections(SectionType type, T content) {
-        AbstractSection section = sections.computeIfAbsent(type, this::createSection);
+    public <T> void addData(Enum type, T content) {
+        AbstractSection section;
+        if (type instanceof SectionType) {
+            section = sections.computeIfAbsent((SectionType) type, this::createSection);
+        } else {
+            section = contacts.computeIfAbsent((ContactType) type, this::createSection);
+        }
         section.addContent(content);
     }
 
+    public AbstractSection getData(Enum type) {
+        AbstractSection as = contacts.get(type);
+        return as != null ? as : sections.get(type);
+    }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder(fullName);
         builder.append(System.lineSeparator());
 
-        for (Map.Entry<ContactType, String> entry : contacts.entrySet()) {
+        for (Map.Entry<ContactType, AbstractSection> entry : contacts.entrySet()) {
             builder.append(entry.getKey().getTitle())
                     .append(": ")
-                    .append(entry.getValue())
+                    .append(entry.getValue().toString())
                     .append(System.lineSeparator());
         }
 
@@ -98,14 +99,12 @@ public class Resume implements Comparable<Resume> {
         return cmp != 0 ? cmp : uuid.compareTo(o.uuid);
     }
 
-    private AbstractSection createSection(SectionType type) {
-        if (type == PERSONAL || type == OBJECTIVE) {
-            return new StringSection();
-        } else if (type == ACHIEVEMENT || type == QUALIFICATIONS) {
+    private AbstractSection createSection(Enum type) {
+        if (type == ACHIEVEMENT || type == QUALIFICATIONS) {
             return new StringListSection();
         } else if (type == EXPERIENCE || type == EDUCATION) {
             return new OrganizationSection();
         }
-        return null;
+        return new StringSection();
     }
 }
