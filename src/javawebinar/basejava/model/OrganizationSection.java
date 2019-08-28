@@ -4,9 +4,16 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-public class OrganizationSection extends AbstractSection<List<String>> {
+public class OrganizationSection extends AbstractSection {
 
     private Set<Organization> organizations = new TreeSet<>();
+
+    public OrganizationSection(List<List<String>> lists) {
+        for (List<String> list: lists) {
+            addContent(list);
+        }
+
+    }
 
     @Override
     public String toString() {
@@ -31,7 +38,6 @@ public class OrganizationSection extends AbstractSection<List<String>> {
         return Objects.hash(organizations);
     }
 
-    @Override
     public void addContent(List<String> list) {
         if (list.size() == 4) {
             organizations.add(new Organization(list.get(0), list.get(1), list.get(2), list.get(3)));
@@ -73,6 +79,7 @@ public class OrganizationSection extends AbstractSection<List<String>> {
         @Override
         public String toString() {
             StringBuilder builder = new StringBuilder(orgName)
+                    .append(System.lineSeparator())
                     .append(getFromTo())
                     .append("\t");
             if (position != null) {

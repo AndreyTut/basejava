@@ -2,11 +2,15 @@ package javawebinar.basejava.model;
 
 import java.util.Objects;
 
-public class StringSection extends AbstractSection<String> {
+public class StringSection extends AbstractSection {
 
     private String content;
 
-   @Override
+    public StringSection(String content) {
+        this.content = content;
+    }
+
+    @Override
     public String toString() {
         return content;
     }
@@ -24,7 +28,6 @@ public class StringSection extends AbstractSection<String> {
         return Objects.hash(content);
     }
 
-    @Override
     public void addContent(String content) {
         this.content = content;
     }

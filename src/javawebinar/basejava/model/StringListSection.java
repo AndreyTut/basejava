@@ -4,9 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class StringListSection extends AbstractSection<String> {
+public class StringListSection extends AbstractSection {
 
     private List<String> list = new ArrayList<>();
+
+    public StringListSection(List<String> list) {
+        this.list = list;
+    }
 
     @Override
     public String toString() {
@@ -31,7 +35,6 @@ public class StringListSection extends AbstractSection<String> {
         return Objects.hash(list);
     }
 
-    @Override
     public void addContent(String content) {
         list.add(content);
     }
