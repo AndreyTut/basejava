@@ -29,6 +29,7 @@ public class Resume implements Comparable<Resume> {
         this.fullName = fullName;
     }
 
+
     public String getUuid() {
         return uuid;
     }
@@ -39,6 +40,14 @@ public class Resume implements Comparable<Resume> {
 
     public AbstractSection getSection(SectionType type) {
         return sections.get(type);
+    }
+
+    public void addContact(ContactType type, String contact){
+        contacts.put(type, contact);
+    }
+
+    public void addSection(SectionType type, AbstractSection section){
+        sections.put(type, section);
     }
 
     @Override
