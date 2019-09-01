@@ -3,13 +3,13 @@ package javawebinar.basejava.model;
 import java.time.LocalDate;
 import java.util.Objects;
 
-public class Employing {
+public class Position {
     private final LocalDate startDate;
     private final LocalDate endDate;
     private final String title;
     private final String description;
 
-    public Employing(LocalDate startDate, LocalDate endDate, String title, String description) {
+    public Position(LocalDate startDate, LocalDate endDate, String title, String description) {
         Objects.requireNonNull(startDate, "startDate must not be null");
         Objects.requireNonNull(endDate, "endDate must not be null");
         Objects.requireNonNull(title, "title must not be null");
@@ -23,14 +23,14 @@ public class Employing {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Employing)) return false;
+        if (!(o instanceof Position)) return false;
 
-        Employing employing = (Employing) o;
+        Position position = (Position) o;
 
-        if (!startDate.equals(employing.startDate)) return false;
-        if (!endDate.equals(employing.endDate)) return false;
-        if (!title.equals(employing.title)) return false;
-        return description != null ? description.equals(employing.description) : employing.description == null;
+        if (!startDate.equals(position.startDate)) return false;
+        if (!endDate.equals(position.endDate)) return false;
+        if (!title.equals(position.title)) return false;
+        return description != null ? description.equals(position.description) : position.description == null;
     }
 
     @Override
@@ -44,7 +44,7 @@ public class Employing {
 
     @Override
     public String toString() {
-        return "Employing{" +
+        return "Position{" +
                 "startDate=" + startDate +
                 ", endDate=" + endDate +
                 ", title='" + title + '\'' +

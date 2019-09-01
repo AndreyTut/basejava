@@ -5,10 +5,10 @@ import java.util.List;
 public class Organization {
     private final Link homePage;
 
-    private final List<Employing> employings;
+    private final List<Position> positions;
 
-    public Organization(String name, String url, List<Employing> employings) {
-        this.employings = employings;
+    public Organization(String name, String url, List<Position> positions) {
+        this.positions = positions;
         this.homePage = new Link(name, url);
     }
 
@@ -20,13 +20,13 @@ public class Organization {
         Organization that = (Organization) o;
 
         if (!homePage.equals(that.homePage)) return false;
-        return employings.equals(that.employings);
+        return positions.equals(that.positions);
     }
 
     @Override
     public int hashCode() {
         int result = homePage.hashCode();
-        result = 31 * result + employings.hashCode();
+        result = 31 * result + positions.hashCode();
         return result;
     }
 
@@ -34,7 +34,7 @@ public class Organization {
     public String toString() {
         return "Organization{" +
                 "homePage=" + homePage +
-                ", employings=" + employings +
+                ", positions=" + positions +
                 '}';
     }
 }

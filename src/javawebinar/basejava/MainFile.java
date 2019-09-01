@@ -3,6 +3,7 @@ package javawebinar.basejava;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Objects;
 
 public class MainFile {
     public static void main(String[] args) throws IOException {
@@ -35,12 +36,11 @@ public class MainFile {
         getFilesNames(projectRoot);
     }
 
-    static void getFilesNames(File inputDir){
-        for (File file: inputDir.listFiles()) {
-            if (file.isDirectory()){
+    static void getFilesNames(File inputDir) {
+        for (File file : Objects.requireNonNull(inputDir.listFiles())) {
+            if (file.isDirectory()) {
                 getFilesNames(file);
-            }
-            else {
+            } else {
                 System.out.println(file.getName());
             }
         }

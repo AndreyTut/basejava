@@ -73,7 +73,7 @@ public abstract class AbstractFileStorage extends AbstractStorage<File> {
     @Override
     protected List<Resume> doCopyAll() {
         List<Resume> resultList = new ArrayList<>();
-        for (File file : directory.listFiles()) {
+        for (File file : Objects.requireNonNull(directory.listFiles())) {
             try {
                 resultList.add(doRead(file));
             } catch (IOException e) {
@@ -85,13 +85,13 @@ public abstract class AbstractFileStorage extends AbstractStorage<File> {
 
     @Override
     public void clear() {
-        for (File f: directory.listFiles()) {
+        for (File f: Objects.requireNonNull(directory.listFiles())) {
             f.delete();
         }
     }
 
     @Override
     public int size() {
-        return directory.list().length;
+        return Objects.requireNonNull(directory.list()).length;
     }
 }
