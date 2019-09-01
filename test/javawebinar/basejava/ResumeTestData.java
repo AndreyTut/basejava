@@ -3,10 +3,12 @@ package javawebinar.basejava;
 import javawebinar.basejava.model.*;
 
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.Arrays;
 
 import static javawebinar.basejava.model.ContactType.*;
 import static javawebinar.basejava.model.SectionType.*;
+import static javawebinar.basejava.util.DateUtil.of;
 
 public class ResumeTestData {
 
@@ -43,41 +45,41 @@ public class ResumeTestData {
 
         resume.addSection(EXPERIENCE, new OrganizationSection(Arrays.asList(
                 new Organization("Java Online Projects", "http://javaops.ru/",
-                        Arrays.asList(new Position(LocalDate.of(2013, 10, 1),
+                        Arrays.asList(new Position(of(2013, Month.of(10)),
                                 LocalDate.now(),
                                 "Автор проекта.",
                                 "Создание, организация и проведение Java онлайн проектов и стажировок."))),
                 new Organization("Wrike", "https://www.wrike.com/",
-                        Arrays.asList(new Position(LocalDate.of(2014, 10, 1),
-                                LocalDate.of(2016, 1, 1),
+                        Arrays.asList(new Position(of(2014, Month.of(10)),
+                                of(2016, Month.of(1)),
                                 "Старший разработчик (backend)",
                                 "Проектирование и разработка онлайн платформы управления проектами Wrike (Java 8 API, Maven, Spring, MyBatis, Guava, Vaadin, PostgreSQL, Redis). Двухфакторная аутентификация, авторизация по OAuth1, OAuth2, JWT SSO."))),
                 new Organization("RIT Center", null,
-                        Arrays.asList(new Position(LocalDate.of(2012, 4, 1),
-                                LocalDate.of(2014, 10, 1),
+                        Arrays.asList(new Position(of(2012, Month.of(4)),
+                                of(2014, Month.of(10)),
                                 "Java архитектор",
                                 "Организация процесса разработки системы ERP для разных окружений: релизная политика, версионирование, ведение CI (Jenkins), миграция базы (кастомизация Flyway), конфигурирование системы (pgBoucer, Nginx), AAA via SSO. Архитектура БД и серверной части системы. Разработка интергационных сервисов: CMIS, BPMN2, 1C (WebServices), сервисов общего назначения (почта, экспорт в pdf, doc, html). Интеграция Alfresco JLAN для online редактирование из браузера документов MS Office. Maven + plugin development, Ant, Apache Commons, Spring security, Spring MVC, Tomcat,WSO2, xcmis, OpenCmis, Bonita, Python scripting, Unix shell remote scripting via ssh tunnels, PL/Python0000000")))
         )));
 
         resume.addSection(EDUCATION, new OrganizationSection(Arrays.asList(
                 new Organization("Coursera", "https://www.coursera.org/learn/progfun1",
-                        Arrays.asList(new Position(LocalDate.of(2013, 3, 1),
-                                LocalDate.of(2013, 5, 1),
+                        Arrays.asList(new Position(of(2013, Month.of(3)),
+                                of(2013, Month.of(5)),
                                 "\"Functional Programming Principles in Scala\" by Martin Odersky",
                                 null))),
                 new Organization("Luxoft", "www.luxoft-training.ru",
-                        Arrays.asList(new Position(LocalDate.of(2011, 3, 1),
-                                LocalDate.of(2011, 4, 1),
+                        Arrays.asList(new Position(of(2011, Month.of(3)),
+                                of(2011, Month.of(4)),
                                 "\tКурс \"Объектно-ориентированный анализ ИС. Концептуальное моделирование на UML.\"",
                                 null))),
                 new Organization("Санкт-Петербургский национальный исследовательский университет информационных технологий, механики и оптики",
                         "http://www.ifmo.ru",
-                        Arrays.asList(new Position(LocalDate.of(1993, 9, 1),
-                                        LocalDate.of(1996, 7, 1),
+                        Arrays.asList(new Position(of(1993, Month.of(9)),
+                                        of(1996, Month.of(7)),
                                         "Аспирантура (программист С, С++)",
                                         null),
-                                new Position(LocalDate.of(1987, 9, 1),
-                                        LocalDate.of(1993, 7, 1),
+                                new Position(of(1987, Month.of(9)),
+                                        of(1993, Month.of(7)),
                                         "Инженер (программист Fortran, C)",
                                         null)
                         )))));
