@@ -39,9 +39,10 @@ public class MainFile {
     static void getFilesNames(File inputDir) {
         for (File file : Objects.requireNonNull(inputDir.listFiles())) {
             if (file.isDirectory()) {
+                System.out.println("Directory: " + file.getName());
                 getFilesNames(file);
             } else {
-                System.out.println(file.getName());
+                System.out.println("file: " + file.getName());
             }
         }
     }
