@@ -3,7 +3,6 @@ package javawebinar.basejava;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Objects;
 
 public class MainFile {
     public static void main(String[] args) throws IOException {
@@ -31,19 +30,30 @@ public class MainFile {
             throw new RuntimeException(e);
         }
 
-        //HW8.2
-        File projectRoot = new File("..\\");
-        getFilesNames(projectRoot);
+        File projectRoot = new File("./src/javawebinar/basejava");
+        printDirectoryDeeply(projectRoot, 0);
     }
 
-    static void getFilesNames(File inputDir) {
-        for (File file : Objects.requireNonNull(inputDir.listFiles())) {
-            if (file.isDirectory()) {
-                System.out.println("Directory: " + file.getName());
-                getFilesNames(file);
-            } else {
-                System.out.println("file: " + file.getName());
+    public static void printDirectoryDeeply(File dir, int level) {
+        File[] files = dir.listFiles();
+
+        if (files != null) {
+            for (File file : files) {
+                if (file.isFile()) {
+                    System.out.println(addSpaces(level) + file.getName());
+                } else if (file.isDirectory()) {
+                    System.out.println(addSpaces(++level) + file.getName());
+                    printDirectoryDeeply(file, ++level);
+                }
             }
         }
+    }
+
+    private static String addSpaces(int number) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < number; i++) {
+            stringBuilder.append(" ");
+        }
+        return stringBuilder.toString();
     }
 }

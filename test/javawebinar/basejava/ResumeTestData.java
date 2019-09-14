@@ -2,19 +2,13 @@ package javawebinar.basejava;
 
 import javawebinar.basejava.model.*;
 
-import java.time.LocalDate;
 import java.time.Month;
-import java.util.Arrays;
 
-import static javawebinar.basejava.model.ContactType.*;
+import static javawebinar.basejava.model.ContactType.MAIL;
+import static javawebinar.basejava.model.ContactType.PHONE;
 import static javawebinar.basejava.model.SectionType.*;
-import static javawebinar.basejava.util.DateUtil.of;
 
 public class ResumeTestData {
-
-
-    static {
-    }
 
     public static Resume createResume(String uuid, String name) {
         return new Resume(uuid, name);

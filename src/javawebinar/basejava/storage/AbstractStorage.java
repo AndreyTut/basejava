@@ -14,11 +14,11 @@ public abstract class AbstractStorage<SK> implements Storage {
 
     protected abstract SK getSearchKey(String uuid);
 
-    protected abstract void doUpdate(Resume r, SK searchKey);
+    protected abstract void doUpdate(Resume resume, SK searchKey);
 
     protected abstract boolean isExist(SK searchKey);
 
-    protected abstract void doSave(Resume r, SK searchKey);
+    protected abstract void doSave(Resume resume, SK searchKey);
 
     protected abstract Resume doGet(SK searchKey);
 
