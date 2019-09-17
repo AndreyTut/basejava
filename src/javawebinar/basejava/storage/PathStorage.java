@@ -4,8 +4,6 @@ import javawebinar.basejava.exception.StorageException;
 import javawebinar.basejava.model.Resume;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,14 +12,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public abstract class AbstractPathStorage extends AbstractStorage<Path> {
+public class PathStorage extends AbstractStorage<Path> {
     private Path directory;
+    private ReadWriteStrategy readWriteStrategy = new ReadWriteObjectStreamStrategy();
 
-    protected abstract void doWrite(Resume r, OutputStream os) throws IOException;
-
-    protected abstract Resume doRead(InputStream is) throws IOException;
-
-    protected AbstractPathStorage(String dir) {
+    protected PathStorage(String dir) {
         directory = Paths.get(dir);
         Objects.requireNonNull(directory, "directory must not be null");
         if (!Files.isDirectory(directory) || !Files.isWritable(directory)) {
@@ -55,7 +50,7 @@ public abstract class AbstractPathStorage extends AbstractStorage<Path> {
     @Override
     protected void doUpdate(Resume r, Path path) {
         try {
-            doWrite(r, Files.newOutputStream(path));
+            readWriteStrategy.doWrite(r, Files.newOutputStream(path));
         } catch (IOException e) {
             throw new StorageException("Path write error", r.getUuid(), e);
         }
@@ -74,7 +69,7 @@ public abstract class AbstractPathStorage extends AbstractStorage<Path> {
     @Override
     protected Resume doGet(Path path) {
         try {
-            return doRead(Files.newInputStream(path));
+            return readWriteStrategy.doRead(Files.newInputStream(path));
         } catch (IOException e) {
             throw new StorageException("Path read error", path.getFileName().toString(), e);
         }
@@ -95,7 +90,7 @@ public abstract class AbstractPathStorage extends AbstractStorage<Path> {
         try {
             Files.list(directory).forEach(path -> {
                 try {
-                    list.add(doRead(Files.newInputStream(path)));
+                    list.add(readWriteStrategy.doRead(Files.newInputStream(path)));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

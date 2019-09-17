@@ -31,29 +31,21 @@ public class MainFile {
         }
 
         File projectRoot = new File("./src/javawebinar/basejava");
-        printDirectoryDeeply(projectRoot, 0);
+        printDirectoryDeeply(projectRoot, "");
     }
 
-    public static void printDirectoryDeeply(File dir, int level) {
+    public static void printDirectoryDeeply(File dir, String indent) {
         File[] files = dir.listFiles();
 
         if (files != null) {
             for (File file : files) {
                 if (file.isFile()) {
-                    System.out.println(addSpaces(level) + file.getName());
+                    System.out.println(indent + file.getName());
                 } else if (file.isDirectory()) {
-                    System.out.println(addSpaces(++level) + file.getName());
-                    printDirectoryDeeply(file, ++level);
+                    System.out.println(indent + file.getName());
+                    printDirectoryDeeply(file, indent + "\t");
                 }
             }
         }
-    }
-
-    private static String addSpaces(int number) {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (int i = 0; i < number; i++) {
-            stringBuilder.append(" ");
-        }
-        return stringBuilder.toString();
     }
 }
