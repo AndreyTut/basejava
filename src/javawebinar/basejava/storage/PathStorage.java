@@ -14,10 +14,11 @@ import java.util.stream.Collectors;
 
 public class PathStorage extends AbstractStorage<Path> {
     private Path directory;
-    private ReadWriteStrategy readWriteStrategy = new ReadWriteObjectStreamStrategy();
+    private ReadWriteStrategy readWriteStrategy;
 
-    protected PathStorage(String dir) {
+    protected PathStorage(String dir, ReadWriteStrategy readWriteStrategy) {
         directory = Paths.get(dir);
+        this.readWriteStrategy = readWriteStrategy;
         Objects.requireNonNull(directory, "directory must not be null");
         if (!Files.isDirectory(directory) || !Files.isWritable(directory)) {
             throw new IllegalArgumentException(dir + " is not directory or is not writable");

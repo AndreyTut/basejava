@@ -10,9 +10,10 @@ import java.util.Objects;
 
 public class FileStorage extends AbstractStorage<File> {
     private File directory;
-    private ReadWriteStrategy readWriteStrategy = new ReadWriteObjectStreamStrategy();
+    private ReadWriteStrategy readWriteStrategy;
 
-    protected FileStorage(File directory) {
+    protected FileStorage(File directory, ReadWriteStrategy readWriteStrategy) {
+        this.readWriteStrategy = readWriteStrategy;
         Objects.requireNonNull(directory, "directory must not be null");
         if (!directory.isDirectory()) {
             throw new IllegalArgumentException(directory.getAbsolutePath() + " is not directory");
