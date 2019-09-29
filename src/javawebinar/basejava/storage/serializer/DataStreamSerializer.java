@@ -8,8 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static javawebinar.basejava.model.SectionType.*;
-
 public class DataStreamSerializer implements StreamSerializer {
 
     @Override
@@ -18,23 +16,24 @@ public class DataStreamSerializer implements StreamSerializer {
             dataOutputStream.writeUTF(resume.getUuid());
             dataOutputStream.writeUTF(resume.getFullName());
 
-            writeMap(resume.getContacts(), dataOutputStream, (t, s) -> dataOutputStream.writeUTF(s));
+            writeMap(resume.getContacts(), dataOutputStream, entry -> dataOutputStream.writeUTF(entry.getValue()));
 
             Map<SectionType, AbstractSection> sections = resume.getSections();
 
-            writeMap(sections, dataOutputStream, (t, s) -> {
-                switch ((SectionType) t) {
+            writeMap(sections, dataOutputStream, entry -> {
+                SectionType key = (SectionType) entry.getKey();
+                switch (key) {
                     case PERSONAL:
                     case OBJECTIVE:
-                        writeTextSection(dataOutputStream, sections, (SectionType) t);
+                        writeTextSection(dataOutputStream, sections, key);
                         break;
                     case ACHIEVEMENT:
                     case QUALIFICATIONS:
-                        writeListSection(dataOutputStream, sections, (SectionType) t);
+                        writeListSection(dataOutputStream, sections, key);
                         break;
                     case EXPERIENCE:
                     case EDUCATION:
-                        writeOrganizationSection(dataOutputStream, sections, (SectionType) t);
+                        writeOrganizationSection(dataOutputStream, sections, key);
                 }
             });
         }
@@ -47,20 +46,13 @@ public class DataStreamSerializer implements StreamSerializer {
 
     private void writeListSection(DataOutputStream dataOutputStream, Map<SectionType, AbstractSection> sections, SectionType type) throws IOException {
         ListSection listSection = (ListSection) sections.get(type);
-        List<String> items = listSection.getItems();
-        dataOutputStream.writeInt(items.size());
-        for (String item : items) {
-            dataOutputStream.writeUTF(item);
-        }
+        writeList(listSection.getItems(), dataOutputStream, dataOutputStream::writeUTF);
     }
 
     private void writeOrganizationSection(DataOutputStream dataOutputStream, Map<SectionType, AbstractSection> sections, SectionType type) throws IOException {
         OrganizationSection organizationSection = (OrganizationSection) sections.get(type);
-        List<Organization> organizations = organizationSection.getOrganizations();
-        dataOutputStream.writeInt(organizations.size());
-
-        for (Organization organization : organizations) {
-            Link homePage = organization.getHomePage();
+        writeList(organizationSection.getOrganizations(), dataOutputStream, o -> {
+            Link homePage = o.getHomePage();
             dataOutputStream.writeUTF(homePage.getName());
             String url = homePage.getUrl();
             if (url != null) {
@@ -69,21 +61,18 @@ public class DataStreamSerializer implements StreamSerializer {
                 dataOutputStream.writeUTF("");
             }
 
-            List<Organization.Position> positions = organization.getPositions();
-            dataOutputStream.writeInt(positions.size());
-
-            for (Organization.Position position : positions) {
-                dataOutputStream.writeUTF(position.getStartDate().toString());
-                dataOutputStream.writeUTF(position.getEndDate().toString());
-                dataOutputStream.writeUTF(position.getTitle());
-                String description = position.getDescription();
+            writeList(o.getPositions(), dataOutputStream, p -> {
+                dataOutputStream.writeUTF(p.getStartDate().toString());
+                dataOutputStream.writeUTF(p.getEndDate().toString());
+                dataOutputStream.writeUTF(p.getTitle());
+                String description = p.getDescription();
                 if (description != null) {
                     dataOutputStream.writeUTF(description);
                 } else {
                     dataOutputStream.writeUTF("");
                 }
-            }
-        }
+            });
+        });
     }
 
     @Override
@@ -104,22 +93,16 @@ public class DataStreamSerializer implements StreamSerializer {
 
                 switch (type) {
                     case "PERSONAL":
-                        resume.addSection(PERSONAL, new TextSection(dataInputStream.readUTF()));
-                        break;
                     case "OBJECTIVE":
-                        resume.addSection(OBJECTIVE, new TextSection(dataInputStream.readUTF()));
+                        resume.addSection(SectionType.valueOf(type), new TextSection(dataInputStream.readUTF()));
                         break;
                     case "ACHIEVEMENT":
-                        resume.addSection(ACHIEVEMENT, new ListSection(readListSection(dataInputStream)));
-                        break;
                     case "QUALIFICATIONS":
-                        resume.addSection(QUALIFICATIONS, new ListSection(readListSection(dataInputStream)));
+                        resume.addSection(SectionType.valueOf(type), new ListSection(readListSection(dataInputStream)));
                         break;
                     case "EXPERIENCE":
-                        resume.addSection(EXPERIENCE, new OrganizationSection(readOrganizationSection(dataInputStream)));
-                        break;
                     case "EDUCATION":
-                        resume.addSection(EDUCATION, new OrganizationSection(readOrganizationSection(dataInputStream)));
+                        resume.addSection(SectionType.valueOf(type), new OrganizationSection(readOrganizationSection(dataInputStream)));
                         break;
                 }
             }
@@ -166,11 +149,19 @@ public class DataStreamSerializer implements StreamSerializer {
         return organizations;
     }
 
-    private <T> void writeMap(Map<? extends Enum, T> map, DataOutputStream dataOutputStream, MapWriter<T> writer) throws IOException {
+    private <T> void writeMap(Map<? extends Enum, T> map, DataOutputStream dataOutputStream, DataWriter<Map.Entry<? extends Enum, T>> writer) throws IOException {
         dataOutputStream.writeInt(map.size());
         for (Map.Entry<? extends Enum, T> entry : map.entrySet()) {
             dataOutputStream.writeUTF(entry.getKey().name());
-            writer.write(entry.getKey(), entry.getValue());
+            writer.write(entry);
+        }
+    }
+
+    private <T> void writeList(List<T> list, DataOutputStream dataOutputStream, DataWriter<T> writer) throws IOException {
+        dataOutputStream.writeInt(list.size());
+        for (T t: list) {
+            writer.write(t);
         }
     }
 }
+
