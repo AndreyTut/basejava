@@ -5,6 +5,7 @@ import javawebinar.basejava.model.*;
 import java.io.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -16,12 +17,16 @@ public class DataStreamSerializer implements StreamSerializer {
             dataOutputStream.writeUTF(resume.getUuid());
             dataOutputStream.writeUTF(resume.getFullName());
 
-            writeMap(resume.getContacts(), dataOutputStream, entry -> dataOutputStream.writeUTF(entry.getValue()));
+            writeCollection(resume.getContacts().entrySet(), dataOutputStream, entry -> {
+                dataOutputStream.writeUTF(entry.getKey().name());
+                dataOutputStream.writeUTF(entry.getValue());
+            });
 
             Map<SectionType, AbstractSection> sections = resume.getSections();
 
-            writeMap(sections, dataOutputStream, entry -> {
-                SectionType key = (SectionType) entry.getKey();
+            writeCollection(sections.entrySet(), dataOutputStream, entry -> {
+                SectionType key = entry.getKey();
+                dataOutputStream.writeUTF(key.name());
                 switch (key) {
                     case PERSONAL:
                     case OBJECTIVE:
@@ -46,12 +51,12 @@ public class DataStreamSerializer implements StreamSerializer {
 
     private void writeListSection(DataOutputStream dataOutputStream, Map<SectionType, AbstractSection> sections, SectionType type) throws IOException {
         ListSection listSection = (ListSection) sections.get(type);
-        writeList(listSection.getItems(), dataOutputStream, dataOutputStream::writeUTF);
+        writeCollection(listSection.getItems(), dataOutputStream, dataOutputStream::writeUTF);
     }
 
     private void writeOrganizationSection(DataOutputStream dataOutputStream, Map<SectionType, AbstractSection> sections, SectionType type) throws IOException {
         OrganizationSection organizationSection = (OrganizationSection) sections.get(type);
-        writeList(organizationSection.getOrganizations(), dataOutputStream, o -> {
+        writeCollection(organizationSection.getOrganizations(), dataOutputStream, o -> {
             Link homePage = o.getHomePage();
             dataOutputStream.writeUTF(homePage.getName());
             String url = homePage.getUrl();
@@ -61,7 +66,7 @@ public class DataStreamSerializer implements StreamSerializer {
                 dataOutputStream.writeUTF("");
             }
 
-            writeList(o.getPositions(), dataOutputStream, p -> {
+            writeCollection(o.getPositions(), dataOutputStream, p -> {
                 dataOutputStream.writeUTF(p.getStartDate().toString());
                 dataOutputStream.writeUTF(p.getEndDate().toString());
                 dataOutputStream.writeUTF(p.getTitle());
@@ -149,17 +154,9 @@ public class DataStreamSerializer implements StreamSerializer {
         return organizations;
     }
 
-    private <T> void writeMap(Map<? extends Enum, T> map, DataOutputStream dataOutputStream, DataWriter<Map.Entry<? extends Enum, T>> writer) throws IOException {
-        dataOutputStream.writeInt(map.size());
-        for (Map.Entry<? extends Enum, T> entry : map.entrySet()) {
-            dataOutputStream.writeUTF(entry.getKey().name());
-            writer.write(entry);
-        }
-    }
-
-    private <T> void writeList(List<T> list, DataOutputStream dataOutputStream, DataWriter<T> writer) throws IOException {
-        dataOutputStream.writeInt(list.size());
-        for (T t: list) {
+    private <T> void writeCollection(Collection<T> collection, DataOutputStream dataOutputStream, DataWriter<T> writer) throws IOException {
+        dataOutputStream.writeInt(collection.size());
+        for (T t : collection) {
             writer.write(t);
         }
     }
