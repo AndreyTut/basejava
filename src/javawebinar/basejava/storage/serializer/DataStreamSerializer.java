@@ -4,10 +4,7 @@ import javawebinar.basejava.model.*;
 
 import java.io.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DataStreamSerializer implements StreamSerializer {
 
@@ -86,59 +83,34 @@ public class DataStreamSerializer implements StreamSerializer {
             String uuid = dataInputStream.readUTF();
             String fullName = dataInputStream.readUTF();
             Resume resume = new Resume(uuid, fullName);
-            int size = dataInputStream.readInt();
-            for (int i = 0; i < size; i++) {
-                resume.addContact(ContactType.valueOf(dataInputStream.readUTF()), dataInputStream.readUTF());
-            }
-
-            size = dataInputStream.readInt();
-
-            for (int i = 0; i < size; i++) {
-                String type = dataInputStream.readUTF();
-
+            resume.setContacts(readMap(dataInputStream, ContactType.class, type -> dataInputStream.readUTF()));
+            resume.setSections(readMap(dataInputStream, SectionType.class, type -> {
                 switch (type) {
                     case "PERSONAL":
                     case "OBJECTIVE":
-                        resume.addSection(SectionType.valueOf(type), new TextSection(dataInputStream.readUTF()));
-                        break;
+                        return new TextSection(dataInputStream.readUTF());
                     case "ACHIEVEMENT":
                     case "QUALIFICATIONS":
-                        resume.addSection(SectionType.valueOf(type), new ListSection(readListSection(dataInputStream)));
-                        break;
+                        return new ListSection(readList(dataInputStream, t -> dataInputStream.readUTF()));
                     case "EXPERIENCE":
                     case "EDUCATION":
-                        resume.addSection(SectionType.valueOf(type), new OrganizationSection(readOrganizationSection(dataInputStream)));
-                        break;
+                        return new OrganizationSection(readOrganizationSection(dataInputStream));
                 }
-            }
+                return null;
+            }));
             return resume;
         }
     }
 
-    private List<String> readListSection(DataInputStream dataInputStream) throws IOException {
-        int listSize = dataInputStream.readInt();
-        List<String> list = new ArrayList<>();
-        for (int i = 0; i < listSize; i++) {
-            list.add(dataInputStream.readUTF());
-        }
-        return list;
-    }
-
     private List<Organization> readOrganizationSection(DataInputStream dataInputStream) throws IOException {
-        int ogrsCount = dataInputStream.readInt();
-        List<Organization> organizations = new ArrayList<>();
-
-        for (int i = 0; i < ogrsCount; i++) {
+        return readList(dataInputStream, t -> {
             String pageName = dataInputStream.readUTF();
             String url = dataInputStream.readUTF();
 
             if (url.equals("")) {
                 url = null;
             }
-
-            int positionsCount = dataInputStream.readInt();
-            List<Organization.Position> positions = new ArrayList<>();
-            for (int j = 0; j < positionsCount; j++) {
+            return new Organization(new Link(pageName, url), readList(dataInputStream, n->{
                 LocalDate startDate = LocalDate.parse(dataInputStream.readUTF());
                 LocalDate endDate = LocalDate.parse(dataInputStream.readUTF());
                 String title = dataInputStream.readUTF();
@@ -146,12 +118,9 @@ public class DataStreamSerializer implements StreamSerializer {
                 if (description.equals("")) {
                     description = null;
                 }
-                positions.add(new Organization.Position(startDate, endDate, title, description));
-            }
-            Organization organization = new Organization(new Link(pageName, url), positions);
-            organizations.add(organization);
-        }
-        return organizations;
+                return new Organization.Position(startDate, endDate, title, description);
+            }));
+        });
     }
 
     private <T> void writeCollection(Collection<T> collection, DataOutputStream dataOutputStream, DataWriter<T> writer) throws IOException {
@@ -159,6 +128,25 @@ public class DataStreamSerializer implements StreamSerializer {
         for (T t : collection) {
             writer.write(t);
         }
+    }
+
+    private <K extends Enum<K>, V> Map<K, V> readMap(DataInputStream dataInputStream, Class<K> clazz, DataReader<V> dataReader) throws IOException {
+        Map<K, V> map = new HashMap<>();
+        int size = dataInputStream.readInt();
+        for (int i = 0; i < size; i++) {
+            String name = dataInputStream.readUTF();
+            map.put(K.valueOf(clazz, name), dataReader.read(name));
+        }
+        return map;
+    }
+
+    private <T> List<T> readList(DataInputStream dataInputStream, DataReader<T> dataReader) throws IOException {
+        int listSize = dataInputStream.readInt();
+        List<T> list = new ArrayList<>();
+        for (int i = 0; i < listSize; i++) {
+            list.add(dataReader.read(""));
+        }
+        return list;
     }
 }
 
