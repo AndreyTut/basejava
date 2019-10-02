@@ -83,34 +83,21 @@ public class DataStreamSerializer implements StreamSerializer {
             String uuid = dataInputStream.readUTF();
             String fullName = dataInputStream.readUTF();
             Resume resume = new Resume(uuid, fullName);
-            resume.setContacts(readMap(dataInputStream, ContactType.class, type -> dataInputStream.readUTF()));
-            resume.setSections(readMap(dataInputStream, SectionType.class, type -> {
-                switch (type) {
-                    case "PERSONAL":
-                    case "OBJECTIVE":
-                        return new TextSection(dataInputStream.readUTF());
-                    case "ACHIEVEMENT":
-                    case "QUALIFICATIONS":
-                        return new ListSection(readList(dataInputStream, t -> dataInputStream.readUTF()));
-                    case "EXPERIENCE":
-                    case "EDUCATION":
-                        return new OrganizationSection(readOrganizationSection(dataInputStream));
-                }
-                return null;
-            }));
+            readMap(dataInputStream, ContactType.class, resume);
+            readMap(dataInputStream, SectionType.class, resume);
             return resume;
         }
     }
 
     private List<Organization> readOrganizationSection(DataInputStream dataInputStream) throws IOException {
-        return readList(dataInputStream, t -> {
+        return readList(dataInputStream, () -> {
             String pageName = dataInputStream.readUTF();
             String url = dataInputStream.readUTF();
 
             if (url.equals("")) {
                 url = null;
             }
-            return new Organization(new Link(pageName, url), readList(dataInputStream, n->{
+            return new Organization(new Link(pageName, url), readList(dataInputStream, () -> {
                 LocalDate startDate = LocalDate.parse(dataInputStream.readUTF());
                 LocalDate endDate = LocalDate.parse(dataInputStream.readUTF());
                 String title = dataInputStream.readUTF();
@@ -130,21 +117,38 @@ public class DataStreamSerializer implements StreamSerializer {
         }
     }
 
-    private <K extends Enum<K>, V> Map<K, V> readMap(DataInputStream dataInputStream, Class<K> clazz, DataReader<V> dataReader) throws IOException {
-        Map<K, V> map = new HashMap<>();
+    private void readMap(DataInputStream dataInputStream, Class clazz, Resume resume) throws IOException {
         int size = dataInputStream.readInt();
-        for (int i = 0; i < size; i++) {
-            String name = dataInputStream.readUTF();
-            map.put(K.valueOf(clazz, name), dataReader.read(name));
+        if (clazz.equals(ContactType.class)) {
+            for (int i = 0; i < size; i++) {
+                String name = dataInputStream.readUTF();
+                resume.addContact(ContactType.valueOf(name), dataInputStream.readUTF());
+            }
+        } else {
+            for (int i = 0; i < size; i++) {
+                String name = dataInputStream.readUTF();
+                switch (name) {
+                    case "PERSONAL":
+                    case "OBJECTIVE":
+                        resume.addSection(SectionType.valueOf(name), new TextSection(dataInputStream.readUTF()));
+                        break;
+                    case "ACHIEVEMENT":
+                    case "QUALIFICATIONS":
+                        resume.addSection(SectionType.valueOf(name), new ListSection(readList(dataInputStream, dataInputStream::readUTF)));
+                        break;
+                    case "EXPERIENCE":
+                    case "EDUCATION":
+                        resume.addSection(SectionType.valueOf(name), new OrganizationSection(readOrganizationSection(dataInputStream)));
+                }
+            }
         }
-        return map;
     }
 
     private <T> List<T> readList(DataInputStream dataInputStream, DataReader<T> dataReader) throws IOException {
         int listSize = dataInputStream.readInt();
         List<T> list = new ArrayList<>();
         for (int i = 0; i < listSize; i++) {
-            list.add(dataReader.read(""));
+            list.add(dataReader.read());
         }
         return list;
     }
