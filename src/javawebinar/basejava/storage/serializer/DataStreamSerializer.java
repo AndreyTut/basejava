@@ -83,8 +83,24 @@ public class DataStreamSerializer implements StreamSerializer {
             String uuid = dataInputStream.readUTF();
             String fullName = dataInputStream.readUTF();
             Resume resume = new Resume(uuid, fullName);
-            readMap(dataInputStream, ContactType.class, resume);
-            readMap(dataInputStream, SectionType.class, resume);
+            readMap(dataInputStream, ContactType.class, resume, dataInputStream::readUTF);
+            readMap(dataInputStream, SectionType.class, resume, () -> {
+                SectionType type = SectionType.valueOf(dataInputStream.readUTF());
+                switch (type) {
+                    case PERSONAL:
+                    case OBJECTIVE:
+                        resume.addSection(type, new TextSection(dataInputStream.readUTF()));
+                        break;
+                    case ACHIEVEMENT:
+                    case QUALIFICATIONS:
+                        resume.addSection(type, new ListSection(readList(dataInputStream, dataInputStream::readUTF)));
+                        break;
+                    case EDUCATION:
+                    case EXPERIENCE:
+                        resume.addSection(type, new OrganizationSection(readOrganizationSection(dataInputStream)));
+                }
+                return null;
+            });
             return resume;
         }
     }
@@ -117,29 +133,13 @@ public class DataStreamSerializer implements StreamSerializer {
         }
     }
 
-    private void readMap(DataInputStream dataInputStream, Class clazz, Resume resume) throws IOException {
+    private void readMap(DataInputStream dataInputStream, Class clazz, Resume resume, DataReader dataReader) throws IOException {
         int size = dataInputStream.readInt();
-        if (clazz.equals(ContactType.class)) {
-            for (int i = 0; i < size; i++) {
-                String name = dataInputStream.readUTF();
-                resume.addContact(ContactType.valueOf(name), dataInputStream.readUTF());
-            }
-        } else {
-            for (int i = 0; i < size; i++) {
-                String name = dataInputStream.readUTF();
-                switch (name) {
-                    case "PERSONAL":
-                    case "OBJECTIVE":
-                        resume.addSection(SectionType.valueOf(name), new TextSection(dataInputStream.readUTF()));
-                        break;
-                    case "ACHIEVEMENT":
-                    case "QUALIFICATIONS":
-                        resume.addSection(SectionType.valueOf(name), new ListSection(readList(dataInputStream, dataInputStream::readUTF)));
-                        break;
-                    case "EXPERIENCE":
-                    case "EDUCATION":
-                        resume.addSection(SectionType.valueOf(name), new OrganizationSection(readOrganizationSection(dataInputStream)));
-                }
+        for (int i = 0; i < size; i++) {
+            if (clazz.equals(ContactType.class)) {
+                resume.addContact(ContactType.valueOf(dataInputStream.readUTF()), (String) dataReader.read());
+            } else {
+                dataReader.read();
             }
         }
     }
