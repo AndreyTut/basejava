@@ -11,8 +11,9 @@ public class Interlocutor {
         return name;
     }
 
-    public synchronized void askQuestion(Interlocutor interlocutor) {
+    public synchronized void askQuestion(Interlocutor interlocutor) throws InterruptedException {
         System.out.println(name + " ask question to " + interlocutor.getName());
+        Thread.sleep(500);
         interlocutor.giveAnswer(this);
     }
 
@@ -23,8 +24,20 @@ public class Interlocutor {
     public static void main(String[] args) throws InterruptedException {
         Interlocutor alfa = new Interlocutor("Alfa");
         Interlocutor beta = new Interlocutor("Beta");
-        Thread thread1 = new Thread(() -> alfa.askQuestion(beta));
-        Thread thread2 = new Thread(() -> beta.askQuestion(alfa));
+        Thread thread1 = new Thread(() -> {
+            try {
+                alfa.askQuestion(beta);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        Thread thread2 = new Thread(() -> {
+            try {
+                beta.askQuestion(alfa);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
         thread1.start();
         thread2.start();
     }
