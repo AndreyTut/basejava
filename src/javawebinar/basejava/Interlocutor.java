@@ -13,7 +13,7 @@ public class Interlocutor {
 
     public synchronized void askQuestion(Interlocutor interlocutor) throws InterruptedException {
         System.out.println(name + " ask question to " + interlocutor.getName());
-        Thread.sleep(500);
+        Thread.sleep(100);
         interlocutor.giveAnswer(this);
     }
 
