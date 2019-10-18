@@ -1,8 +1,8 @@
 package javawebinar.basejava;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.IntStream;
 
 public class MainStream {
     public static void main(String[] args) {
@@ -18,15 +18,10 @@ public class MainStream {
     }
 
     static int minValue(int[] values) {
-        AtomicInteger pow = new AtomicInteger(0);
-        Double res = Arrays.stream(values)
-                .boxed()
-                .collect(Collectors.toSet())
-                .stream()
-                .sorted((i1, i2) -> i2 - i1)
-                .map(val -> val * Math.pow(10, pow.getAndIncrement()))
-                .reduce((val1, val2) -> val1 + val2).get();
-        return res.intValue();
+        return IntStream.of(values)
+                .sorted()
+                .distinct()
+                .reduce((i1, i2) -> i1 * 10 + i2).orElse(-1);
     }
 
     static List<Integer> oddOrEven(List<Integer> integers) {
@@ -37,7 +32,7 @@ public class MainStream {
                     if (val % 2 == 0) evens.add(val);
                     else odds.add(val);
                 })
-                .reduce((val1, val2) -> val1 + val2).get();
+                .reduce((val1, val2) -> val1 + val2).orElse(-1);
         return sum % 2 == 0 ? evens : odds;
     }
 }
