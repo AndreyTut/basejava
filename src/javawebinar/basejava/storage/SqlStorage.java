@@ -1,11 +1,8 @@
 package javawebinar.basejava.storage;
 
-import javawebinar.basejava.Config;
-import javawebinar.basejava.exception.ExistStorageException;
 import javawebinar.basejava.exception.NotExistStorageException;
-import javawebinar.basejava.exception.StorageException;
 import javawebinar.basejava.model.Resume;
-import javawebinar.basejava.util.SqlHelper;
+import javawebinar.basejava.sql.SqlHelper;
 
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -13,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SqlStorage implements Storage {
-    private SqlHelper helper;
+    private final SqlHelper helper;
 
     public SqlStorage(String dbUrl, String dbUser, String dbPassword) {
         helper = new SqlHelper(() -> DriverManager.getConnection(dbUrl, dbUser, dbPassword));
@@ -21,36 +18,34 @@ public class SqlStorage implements Storage {
 
     @Override
     public void clear() {
-        helper.executeStatement("DELETE FROM resume", statement -> {
-            statement.execute();
-            return null;
-        });
+        helper.execute("DELETE FROM resume");
     }
 
     @Override
     public void update(Resume resume) {
-        get(resume.getUuid());
-        helper.executeStatement("UPDATE resume SET full_name=? WHERE uuid=?", statement -> {
+        helper.execute("UPDATE resume SET full_name=? WHERE uuid=?", statement -> {
             statement.setString(1, resume.getFullName());
             statement.setString(2, resume.getUuid());
-            statement.execute();
+            if (statement.executeUpdate() == 0) {
+                throw new NotExistStorageException(resume.getUuid());
+            }
             return null;
         });
     }
 
     @Override
     public void save(Resume resume) {
-            helper.executeStatement("INSERT INTO resume (uuid, full_name) VALUES (?,?)", statement -> {
-                statement.setString(1, resume.getUuid());
-                statement.setString(2, resume.getFullName());
-                statement.execute();
-                return null;
-            });
+        helper.execute("INSERT INTO resume (uuid, full_name) VALUES (?,?)", statement -> {
+            statement.setString(1, resume.getUuid());
+            statement.setString(2, resume.getFullName());
+            statement.execute();
+            return null;
+        });
     }
 
     @Override
     public Resume get(String uuid) {
-        return helper.executeStatement("SELECT * FROM resume r WHERE r.uuid =?", statement -> {
+        return helper.execute("SELECT * FROM resume r WHERE r.uuid =?", statement -> {
             statement.setString(1, uuid);
             ResultSet resultSet = statement.executeQuery();
             if (!resultSet.next()) {
@@ -62,7 +57,7 @@ public class SqlStorage implements Storage {
 
     @Override
     public void delete(String uuid) {
-        helper.executeStatement("DELETE FROM resume WHERE uuid=?", statement -> {
+        helper.execute("DELETE FROM resume WHERE uuid=?", statement -> {
             statement.setString(1, uuid);
             if (statement.executeUpdate() == 0) {
                 throw new NotExistStorageException(uuid);
@@ -75,11 +70,11 @@ public class SqlStorage implements Storage {
 
     @Override
     public List<Resume> getAllSorted() {
-        return helper.executeStatement("SELECT * FROM resume ORDER BY full_name, uuid", statement -> {
+        return helper.execute("SELECT * FROM resume ORDER BY full_name, uuid", statement -> {
             ResultSet resultSet = statement.executeQuery();
             List<Resume> list = new ArrayList<>();
             while (resultSet.next()) {
-                list.add(new Resume(resultSet.getString(1).trim(), resultSet.getString(2).trim()));
+                list.add(new Resume(resultSet.getString(1), resultSet.getString(2)));
             }
             return list;
         });
@@ -87,7 +82,7 @@ public class SqlStorage implements Storage {
 
     @Override
     public int size() {
-        return helper.executeStatement("SELECT COUNT(*) FROM resume", statement -> {
+        return helper.execute("SELECT COUNT(*) FROM resume", statement -> {
             ResultSet resultSet = statement.executeQuery();
             resultSet.next();
             return resultSet.getInt(1);
