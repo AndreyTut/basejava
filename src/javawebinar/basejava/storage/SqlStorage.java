@@ -7,12 +7,13 @@ import javawebinar.basejava.sql.SqlExecutor;
 import javawebinar.basejava.sql.SqlHelper;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.logging.Logger;
 
 public class SqlStorage implements Storage {
     private final SqlHelper sqlHelper;
+    private static final Logger LOG = Logger.getLogger(SqlStorage.class.getName());
+
 
     public SqlStorage(String dbUrl, String dbUser, String dbPassword) {
         sqlHelper = new SqlHelper(() -> DriverManager.getConnection(dbUrl, dbUser, dbPassword));
@@ -20,15 +21,18 @@ public class SqlStorage implements Storage {
 
     @Override
     public void clear() {
+        LOG.info("deleting all resumes");
         sqlHelper.execute("DELETE FROM resume");
     }
 
     @Override
     public void update(Resume resume) {
+        LOG.info("update " + resume);
         sqlHelper.transactionalExecute(connection -> {
             executeStatement(connection, "UPDATE resume SET full_name=? WHERE uuid=?",
                     resume.getFullName(), resume.getUuid(), st -> {
                         if (st.executeUpdate() == 0) {
+                            LOG.warning("Resume " + resume.getUuid() + " not exist");
                             throw new NotExistStorageException(resume.getUuid());
                         }
                         return null;
@@ -44,6 +48,7 @@ public class SqlStorage implements Storage {
 
     @Override
     public void save(Resume resume) {
+        LOG.info("save " + resume);
         sqlHelper.transactionalExecute(connection -> {
             executeStatement(connection, "INSERT INTO resume (uuid, full_name) VALUES (?,?)",
                     resume.getUuid(), resume.getFullName(), PreparedStatement::execute);
@@ -54,6 +59,7 @@ public class SqlStorage implements Storage {
 
     @Override
     public Resume get(String uuid) {
+        LOG.info("get " + uuid);
         return sqlHelper.execute("" +
                         "    SELECT * FROM resume r " +
                         " LEFT JOIN contact c " +
@@ -80,12 +86,12 @@ public class SqlStorage implements Storage {
 
     @Override
     public void delete(String uuid) {
+        LOG.info("delete " + uuid);
         sqlHelper.execute("DELETE FROM resume r WHERE r.uuid=?", statement -> {
             statement.setString(1, uuid);
             if (statement.executeUpdate() == 0) {
                 throw new NotExistStorageException(uuid);
             }
-            statement.execute();
             return null;
         });
 
@@ -93,44 +99,27 @@ public class SqlStorage implements Storage {
 
     @Override
     public List<Resume> getAllSorted() {
+        LOG.info("get all sorted");
         return sqlHelper.execute("" +
-                "SELECT * FROM resume r " +
-                "LEFT JOIN contact c " +
-                "ON r.uuid = c.resume_uuid " +
-                "ORDER BY r.full_name, r.uuid", statement -> {
-            ResultSet resultSet = statement.executeQuery();
-            List<Resume> list = new ArrayList<>();
-            Resume currentResume = null;
-            while (resultSet.next()) {
-                String uuid = resultSet.getString("uuid").trim();
-                String fullName = resultSet.getString("full_name").trim();
-                String type = resultSet.getString("type");
-                if (type != null) {
-                    String value = resultSet.getString("value").trim();
-                    if (currentResume == null) {
-                        currentResume = new Resume(uuid, fullName);
-                        currentResume.addContact(ContactType.valueOf(type), value);
-                    } else {
-                        if (uuid.equals(currentResume.getUuid())) {
-                            currentResume.addContact(ContactType.valueOf(type), value);
-                        } else {
-                            list.add(currentResume);
-                            currentResume = new Resume(uuid, fullName);
-                            currentResume.addContact(ContactType.valueOf(type), value);
+                        "SELECT * FROM resume r " +
+                        "LEFT JOIN contact c " +
+                        "ON r.uuid = c.resume_uuid " +
+                        "ORDER BY r.full_name, r.uuid",
+                statement -> {
+                    ResultSet resultSet = statement.executeQuery();
+                    Map<String, Resume> map = new TreeMap<>();
+                    while (resultSet.next()) {
+                        String uuid = resultSet.getString("uuid").trim();
+                        String fullName = resultSet.getString("full_name").trim();
+                        String type = resultSet.getString("type");
+                        map.putIfAbsent(fullName + uuid, new Resume(uuid, fullName));
+                        if (type != null) {
+                            String value = resultSet.getString("value").trim();
+                            map.get(fullName + uuid).addContact(ContactType.valueOf(type), value);
                         }
                     }
-                } else {
-                    if (currentResume != null) {
-                        list.add(currentResume);
-                    }
-                    currentResume = new Resume(uuid, fullName);
-                }
-            }
-            if (currentResume != null) {
-                list.add(currentResume);
-            }
-            return list;
-        });
+                    return new ArrayList<>(map.values());
+                });
     }
 
     @Override
