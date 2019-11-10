@@ -107,15 +107,15 @@ public class SqlStorage implements Storage {
                         "ORDER BY r.full_name, r.uuid",
                 statement -> {
                     ResultSet resultSet = statement.executeQuery();
-                    Map<String, Resume> map = new TreeMap<>();
+                    Map<String, Resume> map = new LinkedHashMap<>();
                     while (resultSet.next()) {
                         String uuid = resultSet.getString("uuid").trim();
                         String fullName = resultSet.getString("full_name").trim();
                         String type = resultSet.getString("type");
-                        map.putIfAbsent(fullName + uuid, new Resume(uuid, fullName));
+                        map.putIfAbsent(uuid, new Resume(uuid, fullName));
                         if (type != null) {
                             String value = resultSet.getString("value").trim();
-                            map.get(fullName + uuid).addContact(ContactType.valueOf(type), value);
+                            map.get(uuid).addContact(ContactType.valueOf(type), value);
                         }
                     }
                     return new ArrayList<>(map.values());
