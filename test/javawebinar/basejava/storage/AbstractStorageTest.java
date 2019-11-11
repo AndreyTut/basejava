@@ -4,10 +4,10 @@ import javawebinar.basejava.Config;
 import javawebinar.basejava.ResumeTestData;
 import javawebinar.basejava.exception.ExistStorageException;
 import javawebinar.basejava.exception.NotExistStorageException;
+import javawebinar.basejava.model.ContactType;
 import javawebinar.basejava.model.Resume;
 import org.junit.Before;
 import org.junit.Test;
-import sun.misc.UUDecoder;
 
 import java.io.File;
 import java.util.Arrays;
@@ -37,6 +37,8 @@ public abstract class  AbstractStorageTest {
         RESUME_2 = ResumeTestData.createResume(UUID_2, "Name2");
         RESUME_3 = ResumeTestData.createResume(UUID_3, "Name3");
         RESUME_4 = ResumeTestData.createResume(UUID_4, "Name4");
+        RESUME_4.addContact(ContactType.PHONE, "44444");
+        RESUME_4.addContact(ContactType.SKYPE, "Skype");
     }
 
     protected AbstractStorageTest(Storage storage) {
