@@ -20,10 +20,10 @@ public class ResumeTestData {
 
         resume.addContact(MAIL, "mail1@ya.ru");
         resume.addContact(PHONE, "11111");
-//        resume.addSection(OBJECTIVE, new TextSection("Objective1"));
-//        resume.addSection(PERSONAL, new TextSection("Personal data"));
-//        resume.addSection(ACHIEVEMENT, new ListSection("Achievement1", "Achievement12", "Achievement13"));
-//        resume.addSection(QUALIFICATIONS, new ListSection("Java", "SQL", "JavaScript"));
+        resume.addSection(OBJECTIVE, new TextSection("Objective1"));
+        resume.addSection(PERSONAL, new TextSection("Personal data"));
+        resume.addSection(ACHIEVEMENT, new ListSection("Achievement1", "Achievement12", "Achievement13"));
+        resume.addSection(QUALIFICATIONS, new ListSection("Java", "SQL", "JavaScript"));
 //        resume.addSection(EXPERIENCE,
 //                new OrganizationSection(
 //                        new Organization("Organization11", "http://Organization11.ru",
