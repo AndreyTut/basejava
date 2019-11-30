@@ -8,7 +8,7 @@ import java.util.Properties;
 
 public class Config {
     private static final Config INSTANCE = new Config();
-    private final File PROPS = new File("config//resumes.properties");
+    private final File PROPS = new File(getHome(), "config\\resumes.properties");
     private File storageDir;
     private Storage storage;
 
@@ -33,5 +33,15 @@ public class Config {
 
     public Storage getStorage() {
         return storage;
+    }
+
+    private File getHome() {
+        String home = System.getProperty("homeDir");
+        File homeDir = new File(home != null ? home : ".");
+        System.out.println(homeDir);
+        if (!homeDir.isDirectory()) {
+            throw new IllegalStateException(homeDir + " is not directory");
+        }
+        return homeDir;
     }
 }

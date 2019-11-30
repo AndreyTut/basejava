@@ -3,6 +3,7 @@ package javawebinar.basejava.storage;
 import javawebinar.basejava.exception.NotExistStorageException;
 import javawebinar.basejava.model.*;
 import javawebinar.basejava.sql.SqlHelper;
+import javawebinar.basejava.util.JsonParser;
 
 import java.sql.*;
 import java.util.*;
@@ -41,8 +42,8 @@ public class SqlStorage implements Storage {
                     throw new NotExistStorageException(resume.getUuid());
                 }
             }
-            deleteFromTable(resume, connection, "contact");
-            deleteFromTable(resume, connection, "section");
+            deleteFromTable(resume, connection, "DELETE FROM contact WHERE resume_uuid = ?");
+            deleteFromTable(resume, connection, "DELETE FROM section WHERE resume_uuid = ?");
             insertContacts(resume, connection);
             insertSections(resume, connection);
             return null;
@@ -152,7 +153,10 @@ public class SqlStorage implements Storage {
     private void insertContacts(Resume resume, Connection connection) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement("INSERT INTO contact (type, value, resume_uuid) VALUES (?,?,?)")) {
             for (Map.Entry<ContactType, String> entry : resume.getContacts().entrySet()) {
-                addToStatement(statement, entry.getKey().name(), entry.getValue(), resume.getUuid());
+                statement.setString(1, entry.getKey().name());
+                statement.setString(2, entry.getValue());
+                statement.setString(3, resume.getUuid());
+                statement.addBatch();
             }
             statement.executeBatch();
         }
@@ -161,25 +165,17 @@ public class SqlStorage implements Storage {
     private void insertSections(Resume resume, Connection connection) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement("INSERT INTO section (type, value, resume_uuid) VALUES (?,?,?)")) {
             for (Map.Entry<SectionType, AbstractSection> entry : resume.getSections().entrySet()) {
-                AbstractSection as = entry.getValue();
-                String section = null;
-                switch (entry.getKey()) {
-                    case PERSONAL:
-                    case OBJECTIVE:
-                        section = ((TextSection) as).getContent();
-                        break;
-                    case QUALIFICATIONS:
-                    case ACHIEVEMENT:
-                        section = String.join("\n", (((ListSection) as).getItems()));
-                }
-                addToStatement(statement, entry.getKey().name(), section, resume.getUuid());
+                statement.setString(1, entry.getKey().name());
+                statement.setString(2, JsonParser.write(entry.getValue(), AbstractSection.class));
+                statement.setString(3, resume.getUuid());
+                statement.addBatch();
             }
             statement.executeBatch();
         }
     }
 
-    private void deleteFromTable(Resume resume, Connection connection, String tableName) throws SQLException {
-        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM " + tableName + " contact WHERE resume_uuid=?")) {
+    private void deleteFromTable(Resume resume, Connection connection, String sql) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, resume.getUuid());
             statement.execute();
         }
@@ -198,24 +194,7 @@ public class SqlStorage implements Storage {
         String value = resultSet.getString("value");
         if (value != null) {
             SectionType type = valueOf(resultSet.getString("type").trim());
-            switch (type) {
-                case PERSONAL:
-                case OBJECTIVE:
-                    resume.addSection(type, new TextSection(value.trim()));
-                    break;
-                case QUALIFICATIONS:
-                case ACHIEVEMENT:
-                    resume.addSection(type, new ListSection(Arrays.asList(value.trim().split("\n"))));
-            }
+            resume.addSection(type, JsonParser.read(value, AbstractSection.class));
         }
     }
-
-    private void addToStatement(PreparedStatement statement, String... params) throws SQLException {
-        for (int i = 0; i < params.length; i++) {
-            statement.setString(i + 1, params[i]);
-        }
-        statement.addBatch();
-    }
-
-
 }
