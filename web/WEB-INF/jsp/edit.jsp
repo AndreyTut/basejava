@@ -45,8 +45,7 @@
                 <c:if test="${listsection!=null}">
                     <jsp:useBean id="listsection" type="javawebinar.basejava.model.ListSection"/>
                 </c:if>
-                <dd><textarea id="textarea1" name="${type.name()}" cols="40" rows="5"><c:forEach
-                        items="${listsection.items}" var="item">${item} &#10;</c:forEach></textarea>
+                <dd><textarea id="textarea1" name="${type.name()}" cols="40" rows="5"><c:forEach items="${listsection.items}" var="item">${item} &#10;</c:forEach></textarea>
                 </dd>
             </dl>
         </c:if>
