@@ -17,8 +17,10 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class ResumeServlet extends HttpServlet {
 
@@ -63,7 +65,7 @@ public class ResumeServlet extends HttpServlet {
 
         for (SectionType type : SectionType.values()) {
             String value = request.getParameter(type.name());
-            if (value == null) {
+            if (value == null || value.trim().length() == 0) {
                 continue;
             }
             switch (type) {
@@ -73,7 +75,11 @@ public class ResumeServlet extends HttpServlet {
                     break;
                 case ACHIEVEMENT:
                 case QUALIFICATIONS:
-                    resume.addSection(type, new ListSection(Arrays.asList(value.split("\n"))));
+                    List<String> items = Arrays.asList(value.split("\n"));
+                    List<String> trimmed = items.stream()
+                            .map(String::trim)
+                            .collect(Collectors.toList());
+                    resume.addSection(type, new ListSection(trimmed));
             }
         }
 
