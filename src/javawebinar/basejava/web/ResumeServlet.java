@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.time.Month;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
@@ -66,6 +68,7 @@ public class ResumeServlet extends HttpServlet {
         for (SectionType type : SectionType.values()) {
             String value = request.getParameter(type.name());
             if (value == null || value.trim().length() == 0) {
+                resume.getSections().remove(type);
                 continue;
             }
             switch (type) {
@@ -80,6 +83,39 @@ public class ResumeServlet extends HttpServlet {
                             .map(String::trim)
                             .collect(Collectors.toList());
                     resume.addSection(type, new ListSection(trimmed));
+                    break;
+                case EXPERIENCE:
+                case EDUCATION:
+                    int orgsCount = Integer.valueOf(request.getParameter(type.name() + "orgscount"));
+                    List<Organization> organizations = new ArrayList<>();
+                    for (int i = 0; i < orgsCount; i++) {
+                        String orgName = request.getParameter(type.name() + "orgname" + (i + 1));
+                        String orgUrl = request.getParameter(type.name() + "orgurl" + (i + 1));
+                        Link link = new Link(orgName, orgUrl);
+                        int posCount = Integer.valueOf(request.getParameter(type.name() + (i + 1) + "poscount"));
+                        List<Organization.Position> positions = new ArrayList<>();
+                        for (int j = 0; j < posCount; j++) {
+                            String startDate = request.getParameter(type.name() + (i + 1) + "startdate" + (j + 1));
+                            String endDate = request.getParameter(type.name() + (i + 1) + "enddate" + (j + 1));
+                            String title = request.getParameter(type.name() + (i + 1) + "title" + (j + 1));
+                            String description = request.getParameter(type.name() + (i + 1) + "description" + (j + 1));
+
+                            int startYear = Integer.parseInt(startDate.split("-")[0]);
+                            int endYear = Integer.parseInt(endDate.split("-")[0]);
+                            Month startMonth = Month.of(Integer.parseInt(startDate.split("-")[1]));
+                            Month endMonth = Month.of(Integer.parseInt(startDate.split("-")[1]));
+
+                            Organization.Position position = new Organization.Position(
+                                    startYear, startMonth, endYear, endMonth, title, description);
+                            positions.add(position);
+                        }
+
+                        Organization organization = new Organization(link, positions);
+                        organizations.add(organization);
+                    }
+                    AbstractSection section = new OrganizationSection(organizations);
+                    resume.addSection(type, section);
+                    break;
             }
         }
 
@@ -101,14 +137,52 @@ public class ResumeServlet extends HttpServlet {
         }
         switch (action) {
             case "delete":
-                storage.delete(request.getParameter("uuid"));
-                response.sendRedirect("resume");
-                return;
+                String orgnum;
+                String posnum;
+                if ((orgnum = request.getParameter("orgnum")) == null) {
+                    storage.delete(uuid);
+                    response.sendRedirect("resume");
+                    return;
+                }
+                Resume resume = storage.get(uuid);
+                OrganizationSection section = (OrganizationSection) resume.getSection(SectionType.valueOf(request.getParameter("type")));
+                List<Organization> organizations = section.getOrganizations();
+                Organization organization = organizations.get(Integer.parseInt(orgnum) - 1);
+                if ((posnum = request.getParameter("posnum")) == null) {
+                    organizations.remove(organization);
+                } else {
+                    organization.getPositions().remove(Integer.parseInt(posnum) - 1);
+                }
+                storage.update(resume);
+                request.setAttribute("resume", resume);
+                break;
             case "view":
             case "edit":
-                request.setAttribute("resume", storage.get(uuid));
+                resume = storage.get(uuid);
+                request.setAttribute("resume", resume);
                 break;
             case "add":
+                break;
+            case "neworg":
+                resume = storage.get(uuid);
+                SectionType type = SectionType.valueOf(request.getParameter("type"));
+                section = (OrganizationSection) resume.getSection(type);
+                if (section == null) {
+                    section = new OrganizationSection(new ArrayList<>());
+                    resume.addSection(type, section);
+                }
+                section.getOrganizations().add(new Organization(new Link("neworg name", "neworg url"), new ArrayList<>()));
+                storage.update(resume);
+                request.setAttribute("resume", resume);
+                break;
+            case "newpos":
+                resume = storage.get(uuid);
+                section = (OrganizationSection) resume.getSection(SectionType.valueOf(request.getParameter("type")));
+                organization = section.getOrganizations().get(Integer.parseInt(request.getParameter("orgnum")) - 1);
+                organization.getPositions().add(new Organization.Position(0, Month.of(1), 0, Month.of(1),
+                        "new position's title", "new position's descripton"));
+                storage.update(resume);
+                request.setAttribute("resume", resume);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown action: " + action);

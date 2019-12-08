@@ -22,7 +22,7 @@ public class WebUtil {
         }
     }
 
-    public String toWebSection(Map.Entry<SectionType, AbstractSection> entry) {
+    public String  toWebSection(Map.Entry<SectionType, AbstractSection> entry) {
         SectionType type = entry.getKey();
         switch (type) {
             case PERSONAL:
@@ -63,7 +63,6 @@ public class WebUtil {
             stringBuilder.append("</td>");
             stringBuilder.append("<td>");
             stringBuilder.append("<b>" + position.getTitle() + "</b><br>");
-            stringBuilder.append(position.getDescription());
             stringBuilder.append(position.getDescription());
             stringBuilder.append("</td>");
             stringBuilder.append("</tr>");

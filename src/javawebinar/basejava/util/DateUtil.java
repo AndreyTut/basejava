@@ -1,6 +1,5 @@
 package javawebinar.basejava.util;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
@@ -16,7 +15,7 @@ public class DateUtil {
         if (localDate.equals(NOW)){
             return "сейчас";
         }
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/yyyy");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/yyyy");
         return formatter.format(localDate);
     }
 }

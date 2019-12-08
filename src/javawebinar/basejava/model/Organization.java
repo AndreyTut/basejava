@@ -90,7 +90,11 @@ public class Organization implements Serializable {
             Objects.requireNonNull(endDate, "endDate must not be null");
             Objects.requireNonNull(title, "title must not be null");
             this.startDate = startDate;
-            this.endDate = endDate;
+            if (endDate.isAfter(LocalDate.now())) {
+                this.endDate = NOW;
+            } else {
+                this.endDate = endDate;
+            }
             this.title = title;
             this.description = description == null ? "" : description;
         }
