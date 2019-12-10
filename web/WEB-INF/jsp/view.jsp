@@ -12,16 +12,18 @@
 <section>
     <h2>${resume.fullName}&nbsp;<a href="resume?uuid=${resume.uuid}&action=edit"><img src="img/pencil.png"></a></h2>
     <i><h3>Contacts:</h3></i>
-        <c:forEach items="${resume.contacts}" var="pair">
-            <jsp:useBean id="pair" type="java.util.Map.Entry<javawebinar.basejava.model.ContactType, java.lang.String>"/>
-            <%=webutil.toHtml(pair.getKey().getTitle(), pair.getValue())%><br>
-        </c:forEach>
+    <c:forEach items="${resume.contacts}" var="pair">
+        <jsp:useBean id="pair" type="java.util.Map.Entry<javawebinar.basejava.model.ContactType, java.lang.String>"/>
+        <%=webutil.toHtml(pair.getKey().getTitle(), pair.getValue())%><br>
+    </c:forEach>
     <hr>
     <c:forEach items="${resume.sections}" var="entry">
-        <jsp:useBean id="entry" type="java.util.Map.Entry<javawebinar.basejava.model.SectionType, javawebinar.basejava.model.AbstractSection>"/>
+        <jsp:useBean id="entry"
+                     type="java.util.Map.Entry<javawebinar.basejava.model.SectionType, javawebinar.basejava.model.AbstractSection>"/>
         <%=webutil.toWebSection(entry)%>
     </c:forEach>
 </section>
+<a href="resume">К списку резюме</a>
 <jsp:include page="fragments/footer.jsp"/>
 </body>
 </html>

@@ -68,7 +68,12 @@ public class ResumeServlet extends HttpServlet {
         for (SectionType type : SectionType.values()) {
             String value = request.getParameter(type.name());
             if (value == null || value.trim().length() == 0) {
-                resume.getSections().remove(type);
+                Organization newOrg = getNewOrg(request, type);
+                if (newOrg != null) {
+                    resume.addSection(type, new OrganizationSection(newOrg));
+                } else {
+                    resume.getSections().remove(type);
+                }
                 continue;
             }
             switch (type) {
@@ -100,19 +105,24 @@ public class ResumeServlet extends HttpServlet {
                             String title = request.getParameter(type.name() + (i + 1) + "title" + (j + 1));
                             String description = request.getParameter(type.name() + (i + 1) + "description" + (j + 1));
 
-                            int startYear = Integer.parseInt(startDate.split("-")[0]);
-                            int endYear = Integer.parseInt(endDate.split("-")[0]);
-                            Month startMonth = Month.of(Integer.parseInt(startDate.split("-")[1]));
-                            Month endMonth = Month.of(Integer.parseInt(startDate.split("-")[1]));
-
-                            Organization.Position position = new Organization.Position(
-                                    startYear, startMonth, endYear, endMonth, title, description);
-                            positions.add(position);
+                            addPositionToList(positions, startDate, endDate, title, description);
                         }
-
+                        String newPositionTitle = request.getParameter(type.name() + orgName + "newpostitle");
+                        if (newPositionTitle != null && newPositionTitle.trim().length() != 0) {
+                            String newPosStartDate = request.getParameter(type.name() + orgName + "newposstartdate");
+                            String newPosSEndDate = request.getParameter(type.name() + orgName + "newposenddate");
+                            String newPosSDescription = request.getParameter(type.name() + orgName + "newposdescription");
+                            addPositionToList(positions, newPosStartDate, newPosSEndDate, newPositionTitle, newPosSDescription);
+                        }
                         Organization organization = new Organization(link, positions);
                         organizations.add(organization);
                     }
+
+                    Organization newOrg = getNewOrg(request, type);
+                    if (newOrg != null) {
+                        organizations.add(newOrg);
+                    }
+
                     AbstractSection section = new OrganizationSection(organizations);
                     resume.addSection(type, section);
                     break;
@@ -163,27 +173,6 @@ public class ResumeServlet extends HttpServlet {
                 break;
             case "add":
                 break;
-            case "neworg":
-                resume = storage.get(uuid);
-                SectionType type = SectionType.valueOf(request.getParameter("type"));
-                section = (OrganizationSection) resume.getSection(type);
-                if (section == null) {
-                    section = new OrganizationSection(new ArrayList<>());
-                    resume.addSection(type, section);
-                }
-                section.getOrganizations().add(new Organization(new Link("neworg name", "neworg url"), new ArrayList<>()));
-                storage.update(resume);
-                request.setAttribute("resume", resume);
-                break;
-            case "newpos":
-                resume = storage.get(uuid);
-                section = (OrganizationSection) resume.getSection(SectionType.valueOf(request.getParameter("type")));
-                organization = section.getOrganizations().get(Integer.parseInt(request.getParameter("orgnum")) - 1);
-                organization.getPositions().add(new Organization.Position(0, Month.of(1), 0, Month.of(1),
-                        "new position's title", "new position's descripton"));
-                storage.update(resume);
-                request.setAttribute("resume", resume);
-                break;
             default:
                 throw new IllegalArgumentException("Unknown action: " + action);
         }
@@ -191,5 +180,26 @@ public class ResumeServlet extends HttpServlet {
         request.setAttribute("webutil", util);
         String nextPage = "view".equals(action) ? "WEB-INF/jsp/view.jsp" : "WEB-INF/jsp/edit.jsp";
         request.getRequestDispatcher(nextPage).forward(request, response);
+    }
+
+    private Organization getNewOrg(HttpServletRequest request, SectionType type) {
+        String newOrgName = request.getParameter(type.name() + "neworgname");
+        String newOrgUrl = request.getParameter(type.name() + "neworgurl");
+        Organization newOrganization = null;
+        if (newOrgName != null && newOrgName.trim().length() != 0) {
+            newOrganization = new Organization(newOrgName, newOrgUrl);
+        }
+        return newOrganization;
+    }
+
+    private void addPositionToList(List<Organization.Position> positions, String startDate, String endDate, String title, String description) {
+        int startYear = Integer.parseInt(startDate.split("-")[0]);
+        int endYear = Integer.parseInt(endDate.split("-")[0]);
+        Month startMonth = Month.of(Integer.parseInt(startDate.split("-")[1]));
+        Month endMonth = Month.of(Integer.parseInt(endDate.split("-")[1]));
+
+        Organization.Position position = new Organization.Position(
+                startYear, startMonth, endYear, endMonth, title, description);
+        positions.add(position);
     }
 }

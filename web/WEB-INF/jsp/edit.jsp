@@ -54,30 +54,30 @@
             <c:set var="orgsection" value="${resume.getSection(type)}"/>
             <c:choose>
                 <c:when test="${orgsection!=null}">
-                    <dl>
-                        <dt>${type.name()}</dt>
-                        <dd><input type="text" value="${type.title}" name="${type.name()}"></dd>
-                        <a href="resume?action=neworg&type=${type}&uuid=${resume.uuid}">add new organization
-                            to ${type}</a>
-                    </dl>
+                    <h3>
+                        <dl>
+                            <dt>${type.name()}</dt>
+                            <dd><input type="text" value="${type.title}" name="${type.name()}"></dd>
+                        </dl>
+                    </h3>
                     <jsp:useBean id="orgsection" type="javawebinar.basejava.model.OrganizationSection"/>
                     <input type="hidden" name="${type.name()}orgscount" value="${orgsection.organizations.size()}"/>
                     <c:set var="orgcounter" value="0"/>
                     <c:forEach var="organization" items="${orgsection.organizations}">
                         <c:set var="orgcounter" value="${orgcounter+1}"/>
-                        <dl>
-                            <dt>Organization:</dt>
-                            <dd>
-                                <a href="resume?action=delete&uuid=${resume.uuid}&orgnum=${orgcounter}&type=${type.name()}"><img
-                                        src="img/delete.png"></a>
-                                <input name="${type.name()}orgname${orgcounter}" type="text"
-                                       value="${organization.homePage.name}"/>
-                                <input name="${type.name()}orgurl${orgcounter}" type="text"
-                                       value="${organization.homePage.url}"/>
-                                <a href="resume?action=newpos&uuid=${resume.uuid}&type=${type.name()}&orgnum=${orgcounter}">add
-                                    new position to ${organization.homePage.name}</a>
-                            </dd>
-                        </dl>
+                        <h4>
+                            <dl>
+                                <dt>Organization:</dt>
+                                <dd>
+                                    <a href="resume?action=delete&uuid=${resume.uuid}&orgnum=${orgcounter}&type=${type.name()}"><img
+                                            src="img/delete.png"></a>
+                                    <input name="${type.name()}orgname${orgcounter}" type="text"
+                                           value="${organization.homePage.name}"/>
+                                    <input name="${type.name()}orgurl${orgcounter}" type="text"
+                                           value="${organization.homePage.url}"/>
+                                </dd>
+                            </dl>
+                        </h4>
                         <input type="hidden" name="${type.name()}${orgcounter}poscount"
                                value="${organization.positions.size()}">
                         <c:set var="poscounter" value="0"/>
@@ -117,17 +117,63 @@
                                 </dd>
                             </dl>
                         </c:forEach>
-                    </c:forEach>
-                </c:when>
-                <c:otherwise>
-                    <c:if test="${resume.uuid!=null}">
+                        <h5>Add new position to ${organization.homePage.name}</h5>
                         <dl>
-                            <dt>${type}:</dt>
-                            <dd><a href="resume?action=neworg&type=${type}&uuid=${resume.uuid}">add new organization
-                                to ${type}</a>
+                            <dt>new position title:</dt>
+                            <dd>
+                                <input type="text" name="${type.name()}${organization.homePage.name}newpostitle">
                             </dd>
                         </dl>
-                    </c:if>
+
+
+                        <dl>
+                            <dt>new position start date:</dt>
+                            <dd>
+                                <input type="date"
+                                       name="${type.name()}${organization.homePage.name}newposstartdate"/>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>end date:</dt>
+                            <dd>
+                                <input type="date"
+                                       name="${type.name()}${organization.homePage.name}newposenddate"/>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>description:</dt>
+                            <dd>
+                                <textarea name="${type.name()}${organization.homePage.name}newposdescription"
+                                          cols="40" rows="5"></textarea>
+                            </dd>
+                        </dl>
+                    </c:forEach>
+                    <h5>Add new organization to ${type.name()}:</h5>
+                    <dl>
+                        <dt>New organization name:</dt>
+                        <dd>
+                            <input name="${type.name()}neworgname" type="text"/>
+                        </dd>
+                        <dt>New organization url:</dt>
+                        <dd>
+                            <input name="${type.name()}neworgurl" type="text"/>
+                        </dd>
+                    </dl>
+                </c:when>
+                <c:otherwise>
+                    <dl>
+                        <dt>${type.name()}</dt>
+                        <dd>
+                        <dt>organization name :</dt>
+                        <dd>
+                            <input name="${type.name()}neworgname" type="text"/>
+                        </dd>
+                        <dt>organization url:</dt>
+                        <dd>
+                            <input name="${type.name()}neworgurl" type="text"/>
+                        </dd>
+                        </dd>
+                    </dl>
                 </c:otherwise>
             </c:choose>
         </c:if>
