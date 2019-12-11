@@ -6,15 +6,15 @@ import java.util.List;
 import java.util.Map;
 
 public class WebUtil {
-    protected String toHtml0(String title, String value) {
+    protected static String toHtml0(String title, String value) {
         return title + ": " + value;
     }
 
-    public String toHtml(String title, String value) {
+    public static String toHtml(String title, String value) {
         return (value == null) ? "" : toHtml0(title, value);
     }
 
-    public String toLink(String href, String title) {
+    public static String toLink(String href, String title) {
         if (!"".equals(href)) {
             return "<a href='" + href + "'>" + title + "</a>";
         } else {
@@ -22,7 +22,7 @@ public class WebUtil {
         }
     }
 
-    public String  toWebSection(Map.Entry<SectionType, AbstractSection> entry) {
+    public static String  toWebSection(Map.Entry<SectionType, AbstractSection> entry) {
         SectionType type = entry.getKey();
         switch (type) {
             case PERSONAL:
@@ -37,12 +37,12 @@ public class WebUtil {
             case EDUCATION:
                 return "<h2><i>" + type.getTitle() + ":</i></h2>" +
                         listToHtml(((OrganizationSection) entry.getValue()).getOrganizations(),
-                                "", "", this::orgToHtml);
+                                "", "", WebUtil::orgToHtml);
         }
         return "";
     }
 
-    private <T> String listToHtml(List<T> list, String startTag, String endTag, TagWrapper<T> wrapper) {
+    private static <T> String listToHtml(List<T> list, String startTag, String endTag, TagWrapper<T> wrapper) {
         StringBuilder stringBuilder = new StringBuilder(startTag);
         for (T t : list) {
             stringBuilder.append(wrapper.wrap(t));
@@ -51,7 +51,7 @@ public class WebUtil {
         return stringBuilder.toString();
     }
 
-    private String orgToHtml(Organization organization) {
+    private static String orgToHtml(Organization organization) {
         String title = toLink(organization.getHomePage().getUrl(), organization.getHomePage().getName());
         StringBuilder stringBuilder = new StringBuilder("<h3>" + title + "</h3>");
         stringBuilder.append("<table>");

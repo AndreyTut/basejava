@@ -29,6 +29,10 @@ public class Organization implements Serializable {
         return positions;
     }
 
+    public void setPositions(List<Position> positions) {
+        this.positions = positions;
+    }
+
     public Organization() {
     }
 

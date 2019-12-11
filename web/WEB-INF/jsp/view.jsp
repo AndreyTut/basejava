@@ -3,7 +3,7 @@
 <html>
 <head>
     <jsp:useBean id="resume" class="javawebinar.basejava.model.Resume" scope="request"/>
-    <jsp:useBean id="webutil" type="javawebinar.basejava.util.WebUtil" scope="request"/>
+    <jsp:useBean id="webutil" class="javawebinar.basejava.util.WebUtil" scope="request"/>
     <title>${resume.fullName}</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -14,13 +14,15 @@
     <i><h3>Contacts:</h3></i>
     <c:forEach items="${resume.contacts}" var="pair">
         <jsp:useBean id="pair" type="java.util.Map.Entry<javawebinar.basejava.model.ContactType, java.lang.String>"/>
-        <%=webutil.toHtml(pair.getKey().getTitle(), pair.getValue())%><br>
+        <%--<%=webutil.toHtml(pair.getKey().getTitle(), pair.getValue())%>--%>
+        ${webutil.toHtml(pair.getKey().getTitle(), pair.getValue())}<br>
     </c:forEach>
     <hr>
     <c:forEach items="${resume.sections}" var="entry">
         <jsp:useBean id="entry"
                      type="java.util.Map.Entry<javawebinar.basejava.model.SectionType, javawebinar.basejava.model.AbstractSection>"/>
-        <%=webutil.toWebSection(entry)%>
+        <%--<%=webutil.toWebSection(entry)%>--%>
+        ${webutil.toWebSection(entry)}
     </c:forEach>
 </section>
 <a href="resume">К списку резюме</a>

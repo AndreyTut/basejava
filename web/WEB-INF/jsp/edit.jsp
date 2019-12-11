@@ -6,7 +6,6 @@
 <html>
 <head>
     <jsp:useBean id="resume" class="javawebinar.basejava.model.Resume" scope="request"/>
-    <jsp:useBean id="webutil" type="javawebinar.basejava.util.WebUtil" scope="request"/>
     <title>${resume.fullName}</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -69,7 +68,7 @@
                             <dl>
                                 <dt>Organization:</dt>
                                 <dd>
-                                    <a href="resume?action=delete&uuid=${resume.uuid}&orgnum=${orgcounter}&type=${type.name()}"><img
+                                    <a href="resume?action=deleteorgpos&uuid=${resume.uuid}&orgnum=${orgcounter}&type=${type.name()}"><img
                                             src="img/delete.png"></a>
                                     <input name="${type.name()}orgname${orgcounter}" type="text"
                                            value="${organization.homePage.name}"/>
@@ -86,7 +85,7 @@
                             <dl>
                                 <dt>position title:</dt>
                                 <dd>
-                                    <a href="resume?action=delete&uuid=${resume.uuid}&type=${type.name()}&orgnum=${orgcounter}&posnum=${poscounter}"><img
+                                    <a href="resume?action=deleteorgpos&uuid=${resume.uuid}&type=${type.name()}&orgnum=${orgcounter}&posnum=${poscounter}"><img
                                             src="img/delete.png"></a>
                                     <input type="text" name="${type.name()}${orgcounter}title${poscounter}"
                                            value="${position.title}">
@@ -159,12 +158,43 @@
                             <input name="${type.name()}neworgurl" type="text"/>
                         </dd>
                     </dl>
+
+                    <h5>Add new organization's position</h5>
+                    <dl>
+                        <dt>new position title:</dt>
+                        <dd>
+                            <input type="text" name="${type.name()}newpostitle">
+                        </dd>
+                    </dl>
+
+                    <dl>
+                        <dt>new position start date:</dt>
+                        <dd>
+                            <input type="date"
+                                   name="${type.name()}newposstartdate"/>
+                        </dd>
+                    </dl>
+                    <dl>
+                        <dt>end date:</dt>
+                        <dd>
+                            <input type="date"
+                                   name="${type.name()}newposenddate"/>
+                        </dd>
+                    </dl>
+                    <dl>
+                        <dt>description:</dt>
+                        <dd>
+                                <textarea name="${type.name()}newposdescription"
+                                          cols="40" rows="5"></textarea>
+                        </dd>
+                    </dl>
+
                 </c:when>
                 <c:otherwise>
                     <dl>
                         <dt>${type.name()}</dt>
                         <dd>
-                        <dt>organization name :</dt>
+                        <dt>New organization name :</dt>
                         <dd>
                             <input name="${type.name()}neworgname" type="text"/>
                         </dd>
@@ -172,6 +202,35 @@
                         <dd>
                             <input name="${type.name()}neworgurl" type="text"/>
                         </dd>
+                        </dd>
+                    </dl>
+                    <h5>Add new organization's position</h5>
+                    <dl>
+                        <dt>new position title:</dt>
+                        <dd>
+                            <input type="text" name="${type.name()}newpostitle">
+                        </dd>
+                    </dl>
+
+                    <dl>
+                        <dt>new position start date:</dt>
+                        <dd>
+                            <input type="date"
+                                   name="${type.name()}newposstartdate"/>
+                        </dd>
+                    </dl>
+                    <dl>
+                        <dt>end date:</dt>
+                        <dd>
+                            <input type="date"
+                                   name="${type.name()}newposenddate"/>
+                        </dd>
+                    </dl>
+                    <dl>
+                        <dt>description:</dt>
+                        <dd>
+                                <textarea name="${type.name()}newposdescription"
+                                          cols="40" rows="5"></textarea>
                         </dd>
                     </dl>
                 </c:otherwise>
