@@ -4,7 +4,6 @@ import javawebinar.basejava.Config;
 import javawebinar.basejava.model.*;
 import javawebinar.basejava.storage.SqlStorage;
 import javawebinar.basejava.storage.Storage;
-import javawebinar.basejava.util.WebUtil;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
